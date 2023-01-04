@@ -14,6 +14,14 @@ psql -f schema.sql || {
 	exit 2
 }
 
+# test database Perl module
+perl -MDBI -MDBD::Pg -e '1;' || {
+	print -ru2 "E: acquire: apt-get install libdbd-pg-perl"
+	exit 255
+}
+
+exec perl todb.pl
+
 set -eo pipefail
 while IFS= read -r line; do
 	print -r -- "got $line"

@@ -62,6 +62,27 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION use_session(IN sid TEXT)
+    RETURNS TEXT AS $$
+BEGIN
+	SET search_path TO jensjs, public;
+	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
+	RETURN sid;
+END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION use_session(IN num INTEGER)
+    RETURNS TEXT AS $$
+DECLARE
+	sid TEXT;
+BEGIN
+	SET search_path TO jensjs, public;
+	SELECT schemaname INTO STRICT sid FROM jensjs.sessions WHERE pk=num;
+	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
+	RETURN sid;
+END;
+$$ LANGUAGE 'plpgsql';
+
 CREATE OR REPLACE FUNCTION drop_session(IN num INTEGER)
     RETURNS TEXT AS $$
 DECLARE

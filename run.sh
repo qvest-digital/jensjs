@@ -49,9 +49,10 @@ else
 fi
 
 if (( dovenv )); then
+	set -A venv -- pg_virtualenv -t #-s
 	set -A cmd -- "$0" $portarg
 	print -ru2 -- I: run.sh: starting pg_virtualenv
-	exec pg_virtualenv -t -- "${cmd[@]}"
+	exec "${venv[@]}" -- "${cmd[@]}"
 	exit 255
 fi
 if [[ -z $PGHOST$PGPORT$PGDATABASE$PGUSER$PGPASSWORD ]]; then
