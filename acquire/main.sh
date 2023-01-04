@@ -20,10 +20,12 @@ perl -MDBI -MDBD::Pg -e '1;' || {
 	exit 255
 }
 
-exec perl todb.pl
+# validate header line from input
+IFS= read -r hdrline
+[[ $hdrline = '"p|q|w","TS.","OWD.|MEMBYTES|wdogscheduled?","QDELAY.|NPKTS|NTOOEARLY","CHANCE|handover?|N50US","ecnin|BWLIM|N1MS","ecnout|TSOFS.|N4MS","bit5?|-|NLATER","mark?|-|(THISDELAY)","drop?|-|(&F8)","flow|-|-","PKTLEN|-|-"' ]] || {
+	print -ru2 "E: acquire: wrong input format"
+	exit 1
+}
 
-set -eo pipefail
-while IFS= read -r line; do
-	print -r -- "got $line"
-done
-print -ru2 -- I: acquire: terminating
+# shovel into DB
+exec perl todb.pl "$@"

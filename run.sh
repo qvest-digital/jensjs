@@ -25,16 +25,19 @@ function xsendsig {
 }
 
 function usage {
-	print -ru2 "E: Usage: ${0##*/} [-v] [port]"
+	print -ru2 "E: Usage: ${0##*/} [-kv] [port]"
+	print -ru2 "N: -k: keep running if jensdmp finishes"
 	print -ru2 "N: -v: run under pg_virtualenv(1)"
 	print -ru2 "N: port: for HTTP, default 8080"
 	exit ${1:-1}
 }
+dokeep=
 dovenv=0
 portarg=
-while getopts 'hv' c; do
+while getopts 'hkv' c; do
 	case $c {
 	(h) usage 0 ;;
+	(k) dokeep=-k ;;
 	(v) dovenv=1 ;;
 	(*) usage ;;
 	}
@@ -50,7 +53,7 @@ fi
 
 if (( dovenv )); then
 	set -A venv -- pg_virtualenv -t #-s
-	set -A cmd -- "$0" $portarg
+	set -A cmd -- "$0" $dokeep $portarg
 	print -ru2 -- I: run.sh: starting pg_virtualenv
 	exec "${venv[@]}" -- "${cmd[@]}"
 	exit 255
@@ -114,7 +117,7 @@ pypid=$!
 print -ru2 -- I: run.sh: starting acquire
 {
 	sleep 1
-	exec mksh acquire/main.sh 0<&4
+	exec mksh acquire/main.sh $dokeep 0<&4
 } &
 shpid=$!
 wait $shpid

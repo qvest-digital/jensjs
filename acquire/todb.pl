@@ -34,7 +34,7 @@ sub qbeg {
 }
 &qbeg;
 
-while (<>) {
+while (<STDIN>) {
 	if (/^\"p\"\t/) {
 		s///;
 		$dbhp->pg_putcopydata($_);
@@ -58,3 +58,13 @@ while (<>) {
 $dbhp->pg_putcopyend() if $np > 0;
 $dbhq->pg_putcopyend() if $nq > 0;
 print STDERR "I: acquire: terminating, $ni lines ignored\n";
+$dbhp->disconnect or warn $dbhp->errstr;;
+$dbhq->disconnect or warn $dbhq->errstr;;
+
+if ((shift || '') eq '-k') {
+	print STDERR "N: acquire: waiting for termination request...\n";
+
+	while (1) {
+		sleep 30;
+	}
+}
