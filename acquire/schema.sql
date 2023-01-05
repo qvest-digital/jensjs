@@ -48,7 +48,7 @@ BEGIN
 		isdrop BOOLEAN NOT NULL,
 		flow TEXT NOT NULL
 	);
-	CREATE INDEX p_ts ON p (ts);
+	--CREATE INDEX p_ts ON p (ts);
 	-- (ts, membytes, npkts, handover, bwlim, tsofs)
 	CREATE TABLE q (
 		pk BIGSERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ BEGIN
 		ts NUMERIC(20, 9) NOT NULL,
 		tsofs NUMERIC(20, 9) NOT NULL
 	);
-	CREATE INDEX q_ts ON q (ts);
+	--CREATE INDEX q_ts ON q (ts);
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';
