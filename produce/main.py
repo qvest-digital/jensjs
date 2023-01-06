@@ -6,6 +6,27 @@ import sys
 import http.server
 import urllib.parse
 
+import psycopg2.pool
+
+_dbpool = psycopg2.pool.ThreadedConnectionPool(1, 10, dsn="client_encoding=UTF8")
+class JJSDB(object):
+    def __enter__(self):
+        self.csr = _dbpool.getconn().cursor()
+        return self.csr
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        conn = self.csr.connection
+        try:
+            self.csr.close()
+            _dbpool.putconn(conn, close=(exc_value is not None))
+        except:
+            _dbpool.putconn(conn, close=True)
+            raise
+
+with JJSDB() as csr:
+    csr.execute("""SELECT json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC) FROM jensjs.sessions;""")
+    print(csr.fetchall()[0][0])
+
 _JJS_path_registry = {}
 class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def send_response_only(self, code, message=None):
@@ -40,6 +61,7 @@ def Path(path):
 @Path("/api/test")
 def API_Test(rh, u, qs):
     print('u:', repr(u))
+    foo['bar'][0]
     print('qs:', repr(qs))
     rh.ez_rsp("Okäy!\n")
 
