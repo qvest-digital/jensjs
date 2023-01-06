@@ -18,4 +18,7 @@ if len(sys.argv) > 1:
     port = int(sys.argv[1])
 else:
     port = 8080
-http.server.test(HandlerClass=JJSRequestHandler, port=port)
+http.server.test(HandlerClass=JJSRequestHandler,
+  ServerClass=http.server.ThreadingHTTPServer,
+  port=port)
+#NOTREACHED
