@@ -38,7 +38,12 @@ class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
         qs = urllib.parse.parse_qs(u.query, max_num_fields=20)
         path = urllib.parse.unquote(u.path)
         if path in _JJS_path_registry:
-            _JJS_path_registry[path](self, u, qs)
+            try:
+                _JJS_path_registry[path](self, u, qs)
+            except:
+                # if send_response was already called, we lose
+                self.send_error(500, "Exception caught")
+                raise
         else:
             super().do_GET()
 
@@ -61,7 +66,6 @@ def Path(path):
 @Path("/api/test")
 def API_Test(rh, u, qs):
     print('u:', repr(u))
-    foo['bar'][0]
     print('qs:', repr(qs))
     rh.ez_rsp("Okäy!\n")
 
