@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+ "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"><head>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+ <meta http-equiv="Content-Style-Type" content="text/css" />
+ <meta name="MSSmartTagsPreventParsing" content="TRUE" />
+ <!-- link rel="stylesheet" type="text/css" href="vstyle.css" / -->
+ <title>jensjs start page</title>
+ <meta name="robots" content="noindex, nofollow" />
+ <style type="text/css"><!--/*--><![CDATA[/*><!--*/
+  #tbl {
+	width:100%;
+	table-layout:auto;
+	border-spacing:0.5em;
+  }
+  #tbl th {
+	text-align:left;
+  }
+  .hidden {
+	display:none;
+  }
+  button {
+	appearance:none;
+  }
+  tt {
+	white-space:nowrap;
+  }
+ /*]]>*/--></style>
+ <script type="text/javascript" src="deferDOM.js"></script>
+ <script type="text/javascript"><!--//--><![CDATA[//><!--
+  deferDOM(function onDOMusable() {
+	var lst = document.getElementById('sessionlist');
+	var msg = document.getElementById('msg');
+	var tbl = document.getElementById('tbl');
+	function clkBtn() {
+		alert("not implemented yet; ID=" + this.data);
+	}
+	function processResult(j) {
+		if (!j.length) {
+			msg.innerText = "No sessions available.";
+			return;
+		}
+		msg.innerText = "Processing…";
+		var i, r, c, e;
+		for (i = 0; i < j.length; ++i) {
+			r = tbl.insertRow();
+			c = r.insertCell();
+			e = document.createElement('button');
+			e.data = j[i][0];
+			e.innerText = j[i][0];
+			e.onclick = clkBtn;
+			c.appendChild(e);
+			c = r.insertCell();
+			e = document.createElement('tt');
+			e.innerText = j[i][1];
+			c.appendChild(e);
+			c = r.insertCell();
+			c.innerText = j[i][2];
+		}
+		tbl.className = "";
+		lst.removeChild(msg);
+	}
+	msg.innerText = "Loading…";
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function xhrEvent() {
+		if (xhr.readyState !== 4)
+			return;
+		if (xhr.status === 200)
+			processResult(JSON.parse(xhr.responseText));
+		else
+			msg.innerText = "Error " + xhr.status +
+			    " " + xhr.statusText;
+	};
+	xhr.open("GET", "/api/sessions", true);
+	xhr.send();
+  });
+ //--><!]]></script>
+</head><body>
+<h1>jensjs sessions</h1>
+<div id="sessionlist">
+ <p id="msg">You need ECMAscript to see anything here, really.</p>
+ <table id="tbl" border="0" class="hidden"><tr>
+  <th style="width:1em;">ID</th>
+  <th style="width:1em;">timestamp</th>
+  <th>comment</th>
+ </tr></table>
+</div>
+<hr />
+<address>jensjs by Deutsche Telekom LLCTO</address>
+</body></html>

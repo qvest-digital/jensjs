@@ -23,10 +23,6 @@ class JJSDB(object):
             _dbpool.putconn(conn, close=True)
             raise
 
-with JJSDB() as csr:
-    csr.execute("""SELECT json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC) FROM jensjs.sessions;""")
-    print(csr.fetchall()[0][0])
-
 _JJS_path_registry = {}
 class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def send_response_only(self, code, message=None):
@@ -68,6 +64,15 @@ def API_Test(rh, u, qs):
     print('u:', repr(u))
     print('qs:', repr(qs))
     rh.ez_rsp("Okäy!\n")
+
+@Path("/api/sessions")
+def API_Sessions(rh, u, qs):
+    with JJSDB() as csr:
+        csr.execute("""SELECT json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC)::text FROM jensjs.sessions;""")
+        output = csr.fetchall()[0][0]
+    if not output:
+        output = '[]'
+    rh.ez_rsp(output, ct="application/json")
 
 # …
 

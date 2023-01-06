@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 	ts TIMESTAMP WITH TIME ZONE NOT NULL,
 	pk SERIAL PRIMARY KEY,
 	schemaname TEXT GENERATED ALWAYS AS ('jjs' || pk::text) STORED,
-	comment TEXT
+	comment TEXT NOT NULL DEFAULT ''
 );
 
 -- https://www.postgresql.org/docs/current/catalog-pg-type.html
