@@ -16,11 +16,27 @@
   #tbl th {
 	text-align:left;
   }
+  #tbl textarea {
+	width:100%;
+  }
   .hidden {
 	display:none;
   }
+  .green {
+	background-color:green;
+  }
+  .yellow {
+	background-color:yellow;
+  }
+  .red {
+	background-color:red;
+  }
   button {
 	appearance:none;
+	display:block;
+  }
+  button.eb {
+	width:2.5em;
   }
   tt {
 	white-space:nowrap;
@@ -28,12 +44,89 @@
  /*]]>*/--></style>
  <script type="text/javascript" src="deferDOM.js"></script>
  <script type="text/javascript"><!--//--><![CDATA[//><!--
+  var xhsafe = (function () {
+	// XML/HTML/XHTML-safe and no C0/DEL/C1 control characters; nōn-BMP unfiltered
+	var re = /((?:[\t\n\r -~\xA0-\uD7FF\uE000-\uFFFD]|[\uD800-\uDBFF][\uDC00-\uDFFF])+)/;
+
+	return (function xhsafe(s) {
+		var os = '';
+		var g = s.split(re);
+		var i, j;
+
+		for (i = 0; i < g.length; ++i) {
+			for (j = 0; j < g[i].length; ++j)
+				os += "\uFFFD";
+			if (++i < g.length)
+				os += g[i];
+		}
+		return (os);
+	});
+  })();
+  var ta2s = (function () {
+	var sa = /&/g;
+	var sb = /</g;
+	var sc = />/g;
+	var sd = /\n/g;
+
+	return (function ta2s(s) {
+		s = s.replace(sa, '&amp;');
+		s = s.replace(sb, '&lt;');
+		s = s.replace(sc, '&gt;');
+		s = s.replace(sd, '<br />');
+		return (s);
+	});
+  })();
   deferDOM(function onDOMusable() {
 	var lst = document.getElementById('sessionlist');
 	var msg = document.getElementById('msg');
 	var tbl = document.getElementById('tbl');
+	var ids = {};
 	function clkBtn() {
 		alert("not implemented yet; ID=" + this.data);
+	}
+	function pencilBtn() {
+		var num = this.data;
+		var elts = ids[num];
+		elts[1].value = elts[5];
+		elts[0].className = "hidden";
+		elts[1].className = "";
+		elts[2].className = "eb hidden";
+		elts[3].className = "eb";
+		elts[4].className = "eb";
+	}
+	function editOkBtn() {
+		var num = this.data;
+		var elts = ids[num];
+		elts[5] = xhsafe(elts[1].value);
+		elts[1].value = elts[5];
+		elts[0].innerHTML = ta2s(elts[5]);
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function xhrEvent() {
+			if (xhr.readyState !== 4)
+				return;
+			if (xhr.status === 204) {
+				elts[0].className = "";
+				elts[1].className = "hidden";
+				elts[2].className = "eb green";
+				elts[3].className = "eb hidden";
+				elts[4].className = "eb hidden";
+			} else {
+				elts[3].className = "eb red";
+			}
+		};
+		elts[3].className = "eb yellow";
+		xhr.open("POST", "/api/comment?id=" + num);
+		xhr.send(elts[5]);
+	}
+	function editNoBtn() {
+		var num = this.data;
+		var elts = ids[num];
+		elts[1].value = elts[5];
+		elts[0].className = "";
+		elts[1].className = "hidden";
+		elts[2].className = "eb";
+		elts[3].className = "eb hidden";
+		elts[4].className = "eb hidden";
 	}
 	function processResult(j) {
 		if (!j.length) {
@@ -41,8 +134,14 @@
 			return;
 		}
 		msg.innerText = "Processing…";
-		var i, r, c, e;
+		var i, r, c, elts = [], e;
 		for (i = 0; i < j.length; ++i) {
+			if (!Number.isInteger(j[i][0])) {
+				console.error("no integer: " + j[i][0]);
+				return;
+			}
+			elts[5] = xhsafe(j[i][2]);
+
 			r = tbl.insertRow();
 			c = r.insertCell();
 			e = document.createElement('button');
@@ -52,10 +151,43 @@
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('tt');
-			e.innerText = j[i][1];
+			e.innerText = xhsafe(j[i][1]);
 			c.appendChild(e);
 			c = r.insertCell();
-			c.innerText = j[i][2];
+			e = document.createElement('span');
+			e.innerHTML = ta2s(elts[5]);
+			elts[0] = e; // inner text span
+			c.appendChild(e);
+			e = document.createElement('textarea');
+			e.className = "hidden";
+			e.value = elts[5];
+			elts[1] = e; // value textarea
+			c.appendChild(e);
+			c = r.insertCell();
+			e = document.createElement('button')
+			e.className = "eb";
+			e.data = j[i][0];
+			e.innerText = '🖉';
+			e.onclick = pencilBtn;
+			elts[2] = e; // edit button
+			c.appendChild(e);
+			e = document.createElement('button')
+			e.className = "eb hidden";
+			e.data = j[i][0];
+			e.innerText = '✔';
+			e.onclick = editOkBtn;
+			elts[3] = e; // ok button
+			c.appendChild(e);
+			e = document.createElement('button')
+			e.className = "eb hidden";
+			e.data = j[i][0];
+			e.innerText = '✘';
+			e.onclick = editNoBtn;
+			elts[4] = e; // abort button
+			c.appendChild(e);
+
+			ids[j[i][0]] = elts;
+			elts = [];
 		}
 		tbl.className = "";
 		lst.removeChild(msg);
@@ -83,6 +215,7 @@
   <th style="width:1em;">ID</th>
   <th style="width:1em;">timestamp</th>
   <th>comment</th>
+  <th style="width:1px;"></th>
  </tr></table>
 </div>
 <hr />
