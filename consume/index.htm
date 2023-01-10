@@ -42,40 +42,8 @@
 	white-space:nowrap;
   }
  /*]]>*/--></style>
- <script type="text/javascript" src="deferDOM.js"></script>
+ <script type="text/javascript" src="useful.js"></script>
  <script type="text/javascript"><!--//--><![CDATA[//><!--
-  var xhsafe = (function () {
-	// XML/HTML/XHTML-safe and no C0/DEL/C1 control characters; nōn-BMP unfiltered
-	var re = /((?:[\t\n\r -~\xA0-\uD7FF\uE000-\uFFFD]|[\uD800-\uDBFF][\uDC00-\uDFFF])+)/;
-
-	return (function xhsafe(s) {
-		var os = '';
-		var g = s.split(re);
-		var i, j;
-
-		for (i = 0; i < g.length; ++i) {
-			for (j = 0; j < g[i].length; ++j)
-				os += "\uFFFD";
-			if (++i < g.length)
-				os += g[i];
-		}
-		return (os);
-	});
-  })();
-  var ta2s = (function () {
-	var sa = /&/g;
-	var sb = /</g;
-	var sc = />/g;
-	var sd = /\n/g;
-
-	return (function ta2s(s) {
-		s = s.replace(sa, '&amp;');
-		s = s.replace(sb, '&lt;');
-		s = s.replace(sc, '&gt;');
-		s = s.replace(sd, '<br />');
-		return (s);
-	});
-  })();
   deferDOM(function onDOMusable() {
 	var lst = document.getElementById('sessionlist');
 	var msg = document.getElementById('msg');
@@ -97,14 +65,11 @@
 	function editOkBtn() {
 		var num = this.data;
 		var elts = ids[num];
-		elts[5] = xhsafe(elts[1].value);
+		elts[5] = xhtsafe(elts[1].value);
 		elts[1].value = elts[5];
-		elts[0].innerHTML = ta2s(elts[5]);
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function xhrEvent() {
-			if (xhr.readyState !== 4)
-				return;
-			if (xhr.status === 204) {
+		elts[0].innerHTML = text2html(elts[5]);
+		ezXHR(function postEvent(status, response, xhr) {
+			if (status === 204) {
 				elts[0].className = "";
 				elts[1].className = "hidden";
 				elts[2].className = "eb green";
@@ -113,10 +78,7 @@
 			} else {
 				elts[3].className = "eb red";
 			}
-		};
-		elts[3].className = "eb yellow";
-		xhr.open("POST", "/api/comment?id=" + num);
-		xhr.send(elts[5]);
+		    }, "/api/comment?id=" + num, elts[5]);
 	}
 	function editNoBtn() {
 		var num = this.data;
@@ -140,7 +102,7 @@
 				console.error("no integer: " + j[i][0]);
 				return;
 			}
-			elts[5] = xhsafe(j[i][2]);
+			elts[5] = xhtsafe(j[i][2]);
 
 			r = tbl.insertRow();
 			c = r.insertCell();
@@ -151,11 +113,11 @@
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('tt');
-			e.innerText = xhsafe(j[i][1]);
+			e.innerText = xhtsafe(j[i][1]);
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('span');
-			e.innerHTML = ta2s(elts[5]);
+			e.innerHTML = text2html(elts[5]);
 			elts[0] = e; // inner text span
 			c.appendChild(e);
 			e = document.createElement('textarea');
@@ -193,18 +155,13 @@
 		lst.removeChild(msg);
 	}
 	msg.innerText = "Loading…";
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function xhrEvent() {
-		if (xhr.readyState !== 4)
-			return;
-		if (xhr.status === 200)
-			processResult(JSON.parse(xhr.responseText));
+	ezXHR(function xhrEvent(status, response, xhr) {
+		if (status === 200)
+			processResult(JSON.parse(response));
 		else
-			msg.innerText = "Error " + xhr.status +
+			msg.innerText = "Error " + status +
 			    " " + xhr.statusText;
-	};
-	xhr.open("GET", "/api/sessions", true);
-	xhr.send();
+	    }, "/api/sessions");
   });
  //--><!]]></script>
 </head><body>

@@ -4,4 +4,4 @@ THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF Deutsche Telekom LLCTO
 The copyright notice above does not evidence any
 actual or intended publication of such source code.
 
-The dygraphs and deferDOM libraries have their own licences; see there.
+The dygraphs and useful.js libraries have their own licences; see there.

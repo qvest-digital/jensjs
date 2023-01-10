@@ -1,5 +1,5 @@
 /*-
- * Copyright © 2020
+ * Copyright © 2020, 2023
  *	mirabilos <m@mirbsd.org>
  *
  * Provided that these terms and disclaimer and all copyright notices
@@ -18,15 +18,72 @@
  * of said person’s immediate fault when using the work as intended.
  */
 
-/* deferDOM library {{{ */
-var deferDOM = (function () {
-	var called = 0;
+/**
+ * Escape plaintext, such as from textarea.value, for HTML such as in
+ * span.innerHTML: entities for amp, lt, gt and (numeric) the double,
+ * but not⚠ single, quote; "<br />" for newlines.
+ */
+var text2html = (function _closure_text2html() {
+	var ra = /&/g;
+	var rl = /</g;
+	var rg = />/g;
+	var rq = /"/g;
+	var rn = /\n/g;
+
+	return (function text2html(s) {
+		return (String(s)
+		    .replace(ra, "&amp;")
+		    .replace(rl, "&lt;")
+		    .replace(rg, "&gt;")
+		    .replace(rq, "&#34;")
+		    .replace(rn, "<br />")
+		    );
+	    });
+    })();
+
+/**
+ * Make a string XML/HTML/XHTML/tty-safe: for the BMP, substitute any
+ * codepoint XML/HTML do not permit or that is any control character,
+ * other than CRLF and Tab, with U+FFFD: most C0 controls and DEL and
+ * all C1 controls; loose surrogates, U+FFFE‥U+FFFF (though not other
+ * noncharacters). In astral planes U-00010000‥U-0010FFFF are passed.
+ */
+var xhtsafe = (function _closure_xhtsafe() {
+	var re = /((?:[\t\n\r -~\xA0-\uD7FF\uE000-\uFFFD]|[\uD800-\uDBFF][\uDC00-\uDFFF])+)/;
+
+	return (function xhtsafe(s) {
+		var i, j, o = "";
+		var g = String(s).split(re);
+
+		for (i = 0; i < g.length; ++i) {
+			for (j = 0; j < g[i].length; ++j)
+				o += "\uFFFD";
+			if (++i < g.length)
+				o += g[i];
+		}
+		return (o);
+	    });
+    })();
+
+/**
+ * Usage:
+ *
+ * • deferDOM(some_function);
+ *   enqueues the function as callback (or runs it now)
+ * • deferDOM()
+ *   just returns the status
+ *
+ * Both return true if the DOM is ready, false otherwise.
+ */
+var deferDOM = (function _closure_deferDOM() {
+	var called = false;
 	var tmo = false;
 	var callbackfns = [];
-	var handler = function handler() {
+	var handler = function deferDOM_handler() {
 		/* execute once only */
-		if (called++)
+		if (called)
 			return;
+		called = true;
 		/* clear event handlers and timers */
 		if (document.addEventListener) {
 			document.removeEventListener("DOMContentLoaded",
@@ -38,9 +95,10 @@ var deferDOM = (function () {
 			window.detachEvent("onload", handler);
 		}
 		/* run user callbacks */
-		for (var i = 0; i < callbackfns.length; ++i)
+		var i;
+		for (i = 0; i < callbackfns.length; ++i)
 			callbackfns[i]();
-	};
+	    };
 
 	/* install DOM readiness listeners */
 
@@ -59,7 +117,7 @@ var deferDOM = (function () {
 		}
 		if (tryPoll) {
 			tryPoll = document.documentElement.doScroll;
-			var poll = function poll() {
+			var poll = function deferDOM_poll() {
 				try {
 					tryPoll("left");
 				} catch (e) {
@@ -67,18 +125,18 @@ var deferDOM = (function () {
 					return;
 				}
 				handler();
-			};
+			    };
 			poll();
 		}
 		/* generic ancient browser */
-		var rdychange = function rdychange() {
+		var rdychange = function deferDOM_rdychange() {
 			if (document.readyState === "complete")
 				handler();
 			/* detach if ever called from anywhere */
 			if (!called)
 				return;
 			document.detachEvent("onreadystatechange", rdychange);
-		};
+		    };
 		document.attachEvent("onreadystatechange", rdychange);
 		/* last resort: always works, but later than possible */
 		window.attachEvent("onload", handler);
@@ -89,7 +147,7 @@ var deferDOM = (function () {
 		handler();
 
 	/* function that is called by the user */
-	return function deferDOM(cb) {
+	return (function deferDOM(cb) {
 		/* DOM not ready yet? */
 		if (!called) {
 			/* enqueue into list of callbacks to run */
@@ -100,18 +158,24 @@ var deferDOM = (function () {
 		/* already ready, so just run callback now */
 		if (typeof(cb) === "function")
 			cb();
-		return true;
-	};
-
-	/**
-	 * Usage:
-	 *
-	 * • deferDOM(some_function);
-	 *   enqueues the function as callback (or runs it now)
-	 * • deferDOM()
-	 *   just returns the status
-	 *
-	 * Both return true if the DOM is ready, false otherwise.
-	 */
+		return (true);
+	    });
     })();
-/* deferDOM library }}} */
+
+/**
+ * Easy XMLHttpRequest (“AJAX”). Callback is run upon completion,
+ * whether success or failure, with the status code, data and the
+ * request/response object. Doing JSON.parse(responseText) maybe.
+ */
+function ezXHR(cb, url, data, method) {
+	if (!method)
+		method = data === undefined ? "GET" : "POST";
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function ezXHR_event() {
+		if (xhr.readyState === 4)
+			cb(xhr.status, xhr.responseText, xhr);
+	    };
+	xhr.open(method, url, true);
+	xhr.send(data);
+	return (xhr);
+}
