@@ -57,6 +57,7 @@ if (( dovenv )); then
 	# shellcheck disable=SC2086 # intentional
 	set -A cmd -- "$0" $dokeep $portarg
 	print -ru2 -- I: run.sh: starting pg_virtualenv
+	# shellcheck disable=SC2154 # false positive
 	exec "${venv[@]}" -- "${cmd[@]}"
 	exit 255
 fi
