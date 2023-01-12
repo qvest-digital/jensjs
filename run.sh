@@ -36,12 +36,12 @@ dokeep=
 dovenv=0
 portarg=
 while getopts 'hkv' c; do
-	case $c {
+	case $c in
 	(h) usage 0 ;;
 	(k) dokeep=-k ;;
 	(v) dovenv=1 ;;
 	(*) usage ;;
-	}
+	esac
 done
 shift $((OPTIND - 1))
 if (( $# == 0 )); then
