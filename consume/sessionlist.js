@@ -82,21 +82,21 @@ deferDOM(function onDOMusable() {
 			elts[1] = e; // value textarea
 			c.appendChild(e);
 			c = r.insertCell();
-			e = document.createElement('button')
+			e = document.createElement('button');
 			e.className = "eb";
 			e.data = j[i][0];
 			e.innerText = '🖉';
 			e.onclick = pencilBtn;
 			elts[2] = e; // edit button
 			c.appendChild(e);
-			e = document.createElement('button')
+			e = document.createElement('button');
 			e.className = "eb hidden";
 			e.data = j[i][0];
 			e.innerText = '✔';
 			e.onclick = editOkBtn;
 			elts[3] = e; // ok button
 			c.appendChild(e);
-			e = document.createElement('button')
+			e = document.createElement('button');
 			e.className = "eb hidden";
 			e.data = j[i][0];
 			e.innerText = '✘';
