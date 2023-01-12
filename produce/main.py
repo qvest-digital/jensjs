@@ -1,5 +1,11 @@
 #!/usr/bin/python3
 
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=invalid-name
+# pylint: disable=unused-argument
+
 import os
 import sys
 
@@ -96,7 +102,9 @@ def API_Test_SET(rh, u, qs, data):
 @Path("/api/sessions")
 def API_Sessions(rh, u, qs):
     with JJSDB() as csr:
-        csr.execute("""SELECT json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC)::text FROM jensjs.sessions;""")
+        csr.execute("""SELECT
+          json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC)::text
+          FROM jensjs.sessions;""")
         output = csr.fetchall()[0][0]
     if not output:
         output = '[]'
