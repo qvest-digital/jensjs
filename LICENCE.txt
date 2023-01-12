@@ -4,4 +4,7 @@ THIS IS UNPUBLISHED PROPRIETARY SOURCE CODE OF Deutsche Telekom LLCTO
 The copyright notice above does not evidence any
 actual or intended publication of such source code.
 
+This code will be licenced under an Open Source licence; the exact one
+is still in discussion.
+
 The dygraphs and useful.js libraries have their own licences; see there.
