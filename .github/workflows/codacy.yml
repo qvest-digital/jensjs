@@ -32,6 +32,10 @@ jobs:
     name: Codacy Security Scan
     runs-on: ubuntu-latest
     steps:
+      - name: install dependencies
+        run: |
+          sudo apt-get --purge -y install python3-psycopg2
+
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
         uses: actions/checkout@v3
