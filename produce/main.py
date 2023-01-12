@@ -18,7 +18,7 @@ import psycopg2.pool
 psycopg2.extensions.register_adapter(bytes, psycopg2.extensions.QuotedString)
 
 _dbpool = psycopg2.pool.ThreadedConnectionPool(1, 10, dsn="client_encoding=UTF8")
-class JJSDB(object):
+class JJSDB:
     def __enter__(self):
         self.csr = _dbpool.getconn().cursor()
         return self.csr
