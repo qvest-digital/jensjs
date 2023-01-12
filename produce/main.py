@@ -113,7 +113,7 @@ def API_Sessions(rh, u, qs):
 
 @Path("/api/comment", "POST")
 def API_Comment_SET(rh, u, qs, data):
-    if not 'id' in qs:
+    if 'id' not in qs:
         rh.send_error(422, 'missing ID')
         return
     with JJSDB() as csr:
