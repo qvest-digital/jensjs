@@ -30,7 +30,7 @@ function usage {
 	print -ru2 "N: -k: keep running if jensdmp finishes"
 	print -ru2 "N: -v: run under pg_virtualenv(1)"
 	print -ru2 "N: port: for HTTP, default 8080"
-	exit ${1:-1}
+	exit "${1:-1}"
 }
 dokeep=
 dovenv=0
@@ -82,9 +82,9 @@ shpid=
 function cleanup {
 	print -ru2 -- I: run.sh: cleaning up
 	trap - EXIT
-	[[ -z $pypid ]] || xsendsig $pypid -INT
-	[[ -z $shpid ]] || xsendsig $shpid -INT
-	exit $1
+	[[ -z $pypid ]] || xsendsig "$pypid" -INT
+	[[ -z $shpid ]] || xsendsig "$shpid" -INT
+	exit "$1"
 }
 trap 'cleanup 0' INT
 trap 'cleanup 1' EXIT TERM
