@@ -28,7 +28,7 @@ class JJSDB:
         try:
             self.csr.close()
             _dbpool.putconn(conn, close=(exc_value is not None))
-        except:
+        except:  # noqa: E722
             _dbpool.putconn(conn, close=True)
             raise
 
@@ -46,7 +46,7 @@ class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
         if path in _JJS_path_registry["GET"]:
             try:
                 _JJS_path_registry["GET"][path](self, u, qs)
-            except:
+            except:  # noqa: E722
                 # if send_response was already called, we lose
                 self.send_error(500, "Exception caught")
                 raise
@@ -63,7 +63,7 @@ class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
                 datalen = int(self.headers.get("Content-Length"))
                 data = self.rfile.read(datalen)
                 _JJS_path_registry["POST"][path](self, u, qs, data)
-            except:
+            except:  # noqa: E722
                 # if send_response was already called, we lose
                 self.send_error(500, "Exception caught")
                 raise
