@@ -1,4 +1,5 @@
 #!/bin/mksh
+# shellcheck shell=ksh
 
 trap 'print -ru2 -- I: acquire: got SIGINT, exiting; exit 0' INT
 
