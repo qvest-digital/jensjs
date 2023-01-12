@@ -68,7 +68,8 @@ class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(500, "Exception caught")
                 raise
         else:
-            super().do_POST()
+            #super().do_POST()
+            self.send_error(501, "Cannot POST here")
 
     def ez_rsp(self, body, code=200, ct=None):
         if not isinstance(body, bytes):
