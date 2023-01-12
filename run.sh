@@ -54,6 +54,7 @@ fi
 
 if (( dovenv )); then
 	set -A venv -- pg_virtualenv -t #-s
+	# shellcheck disable=SC2086 # intentional
 	set -A cmd -- "$0" $dokeep $portarg
 	print -ru2 -- I: run.sh: starting pg_virtualenv
 	exec "${venv[@]}" -- "${cmd[@]}"
@@ -100,7 +101,9 @@ trap 'cleanup 1' EXIT TERM
 		exec python3 produce/main.py "$@"
 	} &
 	pspid=$!
+	# shellcheck disable=SC2064 # intentional
 	trap "kill -INT $pspid" INT
+	# shellcheck disable=SC2064 # intentional
 	trap "kill -TERM $pspid" TERM
 	wait $pspid
 	rv=$?
