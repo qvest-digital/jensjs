@@ -1,0 +1,118 @@
+/* browser fixup */
+
+button {
+	appearance:none;
+}
+
+/* general element defaults */
+
+tt,
+.nowrap {
+	white-space:nowrap;
+}
+
+/* general utility classes */
+
+.blk {
+	display:block;
+}
+
+.hidden {
+	display:none;
+}
+
+.red {
+	background-color:red;
+}
+.yellow {
+	background-color:yellow;
+}
+.green {
+	background-color:green;
+}
+.blue {
+	background-color:blue;
+}
+
+.yresizable {
+	overflow:auto;
+	resize:vertical;
+	/* default */
+	height:300px;
+	min-height:16px;
+}
+
+/* styles for the session list page */
+
+.sessionlistpage button.eb {
+	width:2.5em;
+}
+
+#sessionlisttbl {
+	width:100%;
+	table-layout:auto;
+	border-spacing:0.5em;
+}
+#sessionlisttbl th {
+	text-align:left;
+}
+#sessionlisttbl td {
+	vertical-align:top;
+}
+#sessionlisttbl textarea {
+	width:100%;
+	overflow:auto;
+	resize:vertical;
+}
+
+/* styles for the diagram page */
+
+.diagrampage {
+	box-sizing:border-box;
+	background-color:#999999;
+	/*       ↑   →    ↓   ←   */
+	margin:-7px 2px -7px 2px;
+}
+
+.flex-row {
+	box-sizing:border-box;
+	/*      ↑   →   ↓   ←   */
+	margin:9px 0px 9px 0px;
+	display:flex;
+	flex-direction:row;
+	flex-wrap:wrap;
+	/*align-items:baseline; # do not: it disables stretch and has… issues */
+}
+
+.boxfw {
+	box-sizing:border-box;
+	/*      ↑   →   ↓   ←   */
+	margin:9px 0px 9px 0px;
+	background-color:#FFFFFF;
+	padding:3px;
+	width:100%;
+}
+
+.boxl {
+	box-sizing:border-box;
+	/*      ↑   →   ↓   ←   */
+	margin:0px 9px 0px 0px;
+	background-color:#FFFFFF;
+	padding:3px;
+	min-width:24px;
+}
+
+.boxr {
+	box-sizing:border-box;
+	/*      ↑   →   ↓   ←   */
+	margin:0px 0px 0px 0px;
+	background-color:#FFFFFF;
+	padding:3px;
+	min-width:24px;
+}
+
+.boxfw address {
+	padding-left:4px;
+}
+
+/* EOF */

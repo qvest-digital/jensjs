@@ -3,7 +3,7 @@
 deferDOM(function onDOMusable() {
 	var lst = document.getElementById('sessionlist');
 	var msg = document.getElementById('msg');
-	var tbl = document.getElementById('tbl');
+	var tbl = document.getElementById('sessionlisttbl');
 	var ids = {};
 	function clkBtn() {
 		alert("not implemented yet; ID=" + this.data);
@@ -15,8 +15,8 @@ deferDOM(function onDOMusable() {
 		elts[0].className = "hidden";
 		elts[1].className = "";
 		elts[2].className = "eb hidden";
-		elts[3].className = "eb";
-		elts[4].className = "eb";
+		elts[3].className = "eb blk";
+		elts[4].className = "eb blk";
 	}
 	function editOkBtn() {
 		var num = this.data;
@@ -28,11 +28,11 @@ deferDOM(function onDOMusable() {
 			if (status === 204) {
 				elts[0].className = "";
 				elts[1].className = "hidden";
-				elts[2].className = "eb green";
+				elts[2].className = "eb blk green";
 				elts[3].className = "eb hidden";
 				elts[4].className = "eb hidden";
 			} else {
-				elts[3].className = "eb red";
+				elts[3].className = "eb blk red";
 			}
 		    }, "/api/comment?id=" + num, elts[5]);
 	}
@@ -42,7 +42,7 @@ deferDOM(function onDOMusable() {
 		elts[1].value = elts[5];
 		elts[0].className = "";
 		elts[1].className = "hidden";
-		elts[2].className = "eb";
+		elts[2].className = "eb blk";
 		elts[3].className = "eb hidden";
 		elts[4].className = "eb hidden";
 	}
@@ -63,6 +63,8 @@ deferDOM(function onDOMusable() {
 			r = tbl.insertRow();
 			c = r.insertCell();
 			e = document.createElement('button');
+			e.type = 'button';
+			e.className = "blk";
 			e.data = j[i][0];
 			e.innerText = j[i][0];
 			e.onclick = clkBtn;
@@ -83,13 +85,15 @@ deferDOM(function onDOMusable() {
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('button');
-			e.className = "eb";
+			e.type = 'button';
+			e.className = "eb blk";
 			e.data = j[i][0];
 			e.innerText = '🖉';
 			e.onclick = pencilBtn;
 			elts[2] = e; // edit button
 			c.appendChild(e);
 			e = document.createElement('button');
+			e.type = 'button';
 			e.className = "eb hidden";
 			e.data = j[i][0];
 			e.innerText = '✔';
@@ -97,6 +101,7 @@ deferDOM(function onDOMusable() {
 			elts[3] = e; // ok button
 			c.appendChild(e);
 			e = document.createElement('button');
+			e.type = 'button';
 			e.className = "eb hidden";
 			e.data = j[i][0];
 			e.innerText = '✘';
