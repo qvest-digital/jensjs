@@ -124,11 +124,11 @@ def API_Sessions(rh, u, qs):
 
 @Path("/api/comment", "POST")
 def API_Comment_SET(rh, u, qs, data):
-    id = qs_int(rh, qs, 'id')
-    if id is None: return  # pylint: disable=multiple-statements
+    session_id = qs_int(rh, qs, 'id')
+    if session_id is None: return  # pylint: disable=multiple-statements
     with JJSDB() as csr:
         csr.execute("""UPDATE jensjs.sessions SET comment=%s WHERE pk=%s""",
-          (data, id))
+          (data, session_id))
         if csr.rowcount != 1:
             rh.send_error(404, 'no row affected')
             return
@@ -137,14 +137,14 @@ def API_Comment_SET(rh, u, qs, data):
 
 @Path("/api/session")
 def API_Session_Enter(rh, u, qs):
-    id = qs_int(rh, qs, 'id')
-    if id is None: return  # pylint: disable=multiple-statements
+    session_id = qs_int(rh, qs, 'id')
+    if session_id is None: return  # pylint: disable=multiple-statements
     answer = {}
     with JJSDB() as csr:
         csr.execute("""SELECT
           (EXTRACT(EPOCH FROM ts) * 1000)::BIGINT, ts0, pk, comment
           FROM jensjs.use_session(%s)""",
-          (id, ))
+          (session_id, ))
         rows = csr.fetchall()
         if len(rows) != 1:
             rh.send_error(404, 'session not found')
@@ -157,20 +157,20 @@ def API_Session_Enter(rh, u, qs):
       indent=None, separators=(',', ':')).encode('UTF-8')
     rh.ez_rsp(output, ct="application/json")
 
-def API_Session_enter(csr, id):
-    csr.execute("""SELECT pk FROM jensjs.use_session(%s)""", (id, ))
+def API_Session_enter(csr, session_id):
+    csr.execute("""SELECT pk FROM jensjs.use_session(%s)""", (session_id, ))
     rows = csr.fetchall()
     if len(rows) != 1:
         return True
-    return id != rows[0][0]
+    return session_id != rows[0][0]
 
 @Path("/api/session/qdelay")
 def API_Session_qdelay(rh, u, qs):
-    id = qs_int(rh, qs, 'id')
-    if id is None: return  # pylint: disable=multiple-statements
+    session_id = qs_int(rh, qs, 'id')
+    if session_id is None: return  # pylint: disable=multiple-statements
     #inited = False
     with JJSDB() as csr:
-        if API_Session_enter(csr, id):
+        if API_Session_enter(csr, session_id):
             rh.send_error(404, 'session not found')
             return
         rh.send_response(200)
