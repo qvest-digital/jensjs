@@ -9,6 +9,8 @@
 import os
 import sys
 
+import json
+
 import http.server
 import urllib.parse
 
@@ -88,6 +90,14 @@ def _Path(path, method, func):
 def Path(path, method="GET"):
     return lambda func: _Path(path, method, func)
 
+def qs_int(rh, qs, key):
+    try:
+        return int(qs[key])
+    except (KeyError, ValueError):
+        ekey = urllib.parse.quote(key, errors='backslashreplace')
+        rh.send_error(422, 'missing or malformed int(%s) parameter' % ekey)
+        return None
+
 @Path("/api/test")
 def API_Test(rh, u, qs):
     print('u:', repr(u))
@@ -114,17 +124,73 @@ def API_Sessions(rh, u, qs):
 
 @Path("/api/comment", "POST")
 def API_Comment_SET(rh, u, qs, data):
-    if 'id' not in qs:
-        rh.send_error(422, 'missing ID')
-        return
+    id = qs_int(rh, qs, 'id')
+    if id is None: return
     with JJSDB() as csr:
         csr.execute("""UPDATE jensjs.sessions SET comment=%s WHERE pk=%s""",
-          (data, int(qs['id'])))
+          (data, id))
         if csr.rowcount != 1:
             rh.send_error(404, 'no row affected')
             return
         csr.connection.commit()
     rh.ez_rsp('', code=204)
+
+@Path("/api/session")
+def API_Session_Enter(rh, u, qs):
+    id = qs_int(rh, qs, 'id')
+    if id is None: return
+    answer = {}
+    with JJSDB() as csr:
+        csr.execute("""SELECT
+          (EXTRACT(EPOCH FROM ts) * 1000)::BIGINT, ts0, pk, comment
+          FROM jensjs.use_session(%s)""",
+          (id, ))
+        rows = csr.fetchall()
+        if len(rows) != 1:
+            rh.send_error(404, 'session not found')
+            return
+        answer['ts'] = rows[0][0]
+        answer['ms'] = rows[0][1] * 1000
+        answer['id'] = rows[0][2]
+        answer['c'] = rows[0][3]
+    output = json.dumps(answer, ensure_ascii=False, allow_nan=False,
+      indent=None, separators=(',', ':')).encode('UTF-8')
+    rh.ez_rsp(output, ct="application/json")
+
+def API_Session_enter(csr, id):
+    csr.execute("""SELECT pk FROM jensjs.use_session(%s)""", (id, ))
+    rows = csr.fetchall()
+    if len(rows) != 1:
+        return True
+    return id != rows[0][0]
+
+@Path("/api/session/qdelay")
+def API_Session_qdelay(rh, u, qs):
+    id = qs_int(rh, qs, 'id')
+    if id is None: return
+    #inited = False
+    with JJSDB() as csr:
+        if API_Session_enter(csr, id):
+            rh.send_error(404, 'session not found')
+            return
+        rh.send_response(200)
+        rh.send_header("Content-Type", "text/plain")
+        rh.end_headers()
+        csr.copy_expert("""COPY (
+            SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o ORDER BY ts
+          ) TO STDOUT WITH (DELIMITER ',')""", rh.wfile)
+#
+# psychopg3:
+#        with csr.copy("""COPY (
+#            SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o ORDER BY ts
+#          ) TO STDOUT WITH (DELIMITER ',')""") as c:
+#            for data in c:
+#                if not inited:
+#                    rh.send_response(200)
+#                    rh.send_header("Content-Type", "text/plain")
+#                    rh.end_headers()
+#                    inited = True
+#                rh.wfile.write(data)
 
 # …
 
