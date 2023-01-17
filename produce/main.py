@@ -115,7 +115,7 @@ def API_Test_SET(rh, u, qs, data):
 def API_Sessions(rh, u, qs):
     with JJSDB() as csr:
         csr.execute("""SELECT
-          json_agg(json_build_array(pk, ts, comment) ORDER BY ts DESC)::text
+          json_agg(json_build_array(pk, (EXTRACT(EPOCH FROM ts) * 1000)::BIGINT, comment) ORDER BY ts DESC)::text
           FROM jensjs.sessions;""")
         output = csr.fetchall()[0][0]
     if not output:

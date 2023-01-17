@@ -71,7 +71,7 @@ deferDOM(function onDOMusable() {
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('tt');
-			e.innerText = xhtsafe(j[i][1]);
+			e.innerText = usefulJS.ISO8601(j[i][1]);
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('span');
