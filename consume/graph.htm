@@ -20,11 +20,15 @@
   <div class="boxl nowrap">
    <b>Session</b> 1
    <button type="button" onclick="btnSess();">change</button>
+   <button type="button" onclick="g.reload();" title="force reload">🔄</button>
   </div>
   <div class="boxr nowrap">
    <b>SmoothingWindow</b> tbd
   </div>
  </div>
- <div id="divLatency" class="boxfw yresizable"></div>
+ <div class="boxfw yresizable"><div id="divLatency" class="dybox"></div></div>
+ <div class="boxfw" id="sesprop">session properties</div>
  <div class="boxfw"><address>jensjs by Deutsche Telekom LLCTO</address></div>
+ <div id="loadingelt" class="hidden"><div id="loadingtxt">⏳ Loading…<button
+  type="button" id="loadingbtn" onclick="btnSess();">🗊</button></div></div>
 </body></html>

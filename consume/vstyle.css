@@ -74,6 +74,35 @@ tt,
 	margin:-7px 2px -7px 2px;
 }
 
+#loadingelt {
+	z-index:16383;
+	position:fixed;
+		top:0px;
+		left:0px;
+	width:100%;
+	height:100%;
+	background:rgba(0, 0, 0, 0.666);
+}
+#loadingtxt {
+	position:absolute;
+		top:50%;
+		left:50%;
+	-webkit-transform:translate(-50%, -50%);
+	-moz-transform:translate(-50%, -50%);
+	-o-transform:translate(-50%, -50%);
+	-ms-transform:translate(-50%, -50%);
+	transform:translate(-50%, -50%);
+	border:1px solid #134094;
+	background:#FFFFFF;
+	font-size:36pt;
+	padding:0.5em 1em;
+}
+#loadingbtn {
+	position:absolute;
+		top:0px;
+		right:0px;
+}
+
 .flex-row {
 	box-sizing:border-box;
 	/*      ↑   →   ↓   ←   */
@@ -113,6 +142,25 @@ tt,
 
 .boxfw address {
 	padding-left:4px;
+}
+
+.dybox {
+	width:100%;
+	height:100%;
+}
+
+#divLatency .dygraph-xlabel {
+	position:absolute;
+		bottom:1px;
+		right:0px;
+	text-align:left;
+	/* same as axisLabelFontSize */
+	font-size:14px;
+}
+
+#divLatency .dygraph-legend {
+	white-space:nowrap;
+	width:auto;
 }
 
 /* EOF */

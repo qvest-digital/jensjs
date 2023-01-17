@@ -6,7 +6,7 @@ deferDOM(function onDOMusable() {
 	var tbl = document.getElementById('sessionlisttbl');
 	var ids = {};
 	function clkBtn() {
-		alert("not implemented yet; ID=" + this.data);
+		document.location.href = '/graph.htm#id=' + this.data;
 	}
 	function pencilBtn() {
 		var num = this.data;
