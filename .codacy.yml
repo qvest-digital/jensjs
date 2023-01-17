@@ -1,4 +1,9 @@
 ---
+engines:
+  pylint:
+    # pylintpython3 is used instead
+    exclude_paths:
+      - "**"
 languages:
   PostgreSQL:
     extensions:
