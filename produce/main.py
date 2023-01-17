@@ -179,18 +179,6 @@ def API_Session_qdelay(rh, u, qs):
         csr.copy_expert("""COPY (
             SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o ORDER BY ts
           ) TO STDOUT WITH (DELIMITER ',')""", rh.wfile)
-#
-# psychopg3:
-#        with csr.copy("""COPY (
-#            SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o ORDER BY ts
-#          ) TO STDOUT WITH (DELIMITER ',')""") as c:
-#            for data in c:
-#                if not inited:
-#                    rh.send_response(200)
-#                    rh.send_header("Content-Type", "text/plain")
-#                    rh.end_headers()
-#                    inited = True
-#                rh.wfile.write(data)
 
 # …
 
