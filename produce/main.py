@@ -125,7 +125,7 @@ def API_Sessions(rh, u, qs):
 @Path("/api/comment", "POST")
 def API_Comment_SET(rh, u, qs, data):
     id = qs_int(rh, qs, 'id')
-    if id is None: return
+    if id is None: return  # pylint: disable=multiple-statements
     with JJSDB() as csr:
         csr.execute("""UPDATE jensjs.sessions SET comment=%s WHERE pk=%s""",
           (data, id))
@@ -138,7 +138,7 @@ def API_Comment_SET(rh, u, qs, data):
 @Path("/api/session")
 def API_Session_Enter(rh, u, qs):
     id = qs_int(rh, qs, 'id')
-    if id is None: return
+    if id is None: return  # pylint: disable=multiple-statements
     answer = {}
     with JJSDB() as csr:
         csr.execute("""SELECT
@@ -167,7 +167,7 @@ def API_Session_enter(csr, id):
 @Path("/api/session/qdelay")
 def API_Session_qdelay(rh, u, qs):
     id = qs_int(rh, qs, 'id')
-    if id is None: return
+    if id is None: return  # pylint: disable=multiple-statements
     #inited = False
     with JJSDB() as csr:
         if API_Session_enter(csr, id):
