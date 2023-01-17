@@ -4,7 +4,7 @@ engines:
     # pylintpython3 is used instead
     exclude_paths:
       - "**"
-languages:
-  PostgreSQL:
-    extensions:
-      - ".sql"
+  tsqllint:
+    # for Microsoft only
+    exclude_paths:
+      - "**"
