@@ -1,0 +1,10 @@
+pycodestyle:
+  disable:
+    - E305
+
+pylint:
+  disable:
+    - consider-using-f-string
+    # Codacy bug
+    - import-error
+    - useless-suppression
