@@ -1,0 +1,12 @@
+{
+  "ignore": [
+    "box-sizing",
+    "fallback-colors",
+    "ids",
+    "order-alphabetical",
+    "overqualified-elements",
+    "zero-units"
+  ],
+  "warnings": [],
+  "errors": []
+}
