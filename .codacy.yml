@@ -8,3 +8,5 @@ engines:
     # for Microsoft only
     exclude_paths:
       - "**"
+exclude_paths:
+  - ".stylelint/indentationEx.js"
