@@ -1,0 +1,1 @@
+../consume/diagram.js
