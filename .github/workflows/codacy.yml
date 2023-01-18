@@ -9,6 +9,9 @@
       "runs-on": "ubuntu-latest",
       "steps": [
         {
+          "run": "sudo apt-get --purge -y install jq"
+        },
+        {
           "uses": "actions/checkout@v3.3.0"
         },
         {
@@ -30,9 +33,12 @@
           }
         },
         {
+          "run": "jq -c '.runs |= map(select((.results | length) > 0))' <results.sarif >onlyresults.sarif"
+        },
+        {
           "uses": "github/codeql-action/upload-sarif@codeql-bundle-20230105",
           "with": {
-            "sarif_file": "results.sarif"
+            "sarif_file": "onlyresults.sarif"
           }
         }
       ]
