@@ -6,6 +6,7 @@
 # pylint: disable=invalid-name
 # pylint: disable=unused-argument
 # pylint: disable=django-not-configured
+# pylint: disable=consider-using-f-string
 
 import os
 import sys
