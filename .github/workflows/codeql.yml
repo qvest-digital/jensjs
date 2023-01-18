@@ -18,7 +18,7 @@
           }
         },
         {
-          "uses": "github/codeql-action/autobuild@v2"
+          "uses": "github/codeql-action/autobuild@codeql-bundle-20230105"
         },
         {
           "uses": "github/codeql-action/analyze@codeql-bundle-20230105",
