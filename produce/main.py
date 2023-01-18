@@ -5,6 +5,7 @@
 # pylint: disable=missing-function-docstring
 # pylint: disable=invalid-name
 # pylint: disable=unused-argument
+# pylint: disable=django-not-configured
 
 import os
 import sys
