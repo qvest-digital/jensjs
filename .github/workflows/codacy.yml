@@ -9,10 +9,10 @@
       "runs-on": "ubuntu-latest",
       "steps": [
         {
-          "uses": "actions/checkout@v3"
+          "uses": "actions/checkout@v3.3.0"
         },
         {
-          "uses": "codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b",
+          "uses": "codacy/codacy-analysis-cli-action@v4.2.0",
           "with": {
             "format": "sarif",
             "gh-code-scanning-compat": true,
@@ -23,7 +23,7 @@
           }
         },
         {
-          "uses": "github/codeql-action/upload-sarif@v2",
+          "uses": "github/codeql-action/upload-sarif@codeql-bundle-20230105",
           "with": {
             "sarif_file": "results.sarif"
           }
