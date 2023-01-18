@@ -26,13 +26,6 @@
           }
         },
         {
-          "uses": "actions/upload-artifact@v3",
-          "with": {
-            "name": "SARIF",
-            "path": "results.sarif"
-          }
-        },
-        {
           "run": "jq -c '.runs |= map(select((.results | length) > 0))' <results.sarif >onlyresults.sarif"
         },
         {
