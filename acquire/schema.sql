@@ -79,7 +79,7 @@ BEGIN
 			SELECT ts, tsofs, ts + tsofs AS abs1 FROM pq0),
 		    ia1 AS (
 			SELECT ts, tsofs, abs1, abs1::BIGINT AS iabs,
-			    (abs1 - abs1)::BIGINT AS fabs FROM a1),
+			    abs1 - abs1::BIGINT AS fabs FROM a1),
 		    fa1 AS (
 			SELECT ia1.*, ts - fabs AS d FROM ia1)
 		SELECT iabs, d FROM fa1;
