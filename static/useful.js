@@ -80,7 +80,7 @@ var usefulJS = (function _closure_usefulJS() {
 		    !isNaN(dateobject)) ? dateobject :
 		    makeDateObject.apply(null, arguments);
 		var Y = d.getFullYear(),
-		    M = d.getMonth(),
+		    M = d.getMonth() + 1,
 		    D = d.getDate(),
 		    h = d.getHours(),
 		    m = d.getMinutes(),
@@ -432,3 +432,5 @@ function ezXHR(cb, url, data, method, rt) {
 	xhr.send(data);
 	return (xhr);
 }
+
+/* canonical: <https://evolvis.org/plugins/scmgit/cgi-bin/gitweb.cgi?p=useful-scripts/useful-scripts.git;a=tree;f=js;hb=HEAD> */
