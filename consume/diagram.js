@@ -64,12 +64,6 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
 	g.loading(false);
     };
 
-function observeResizing(element, dygraph) {
-	new ResizeObserver(function observedResizing() {
-		dygraph.resize();
-	    }).observe(element);
-}
-
 deferDOM(function onDOMReady() {
 	g.loadingelt = document.getElementById('loadingelt');
 	g.sesprop = document.getElementById('sesprop');
@@ -93,9 +87,9 @@ deferDOM(function onDOMReady() {
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "milliseconds",
-		"labels": ["time", "qdelay", "OWD"]
+		"labels": ["time", "qdelay", "OWD"],
+		"resizable": "passive"
 	    });
-	observeResizing(document.getElementById('divLatency'), g.gLatency); //XXX TODO
 	hashlib(g.onHashChange);
 	g.reload(); // initial load
     });
