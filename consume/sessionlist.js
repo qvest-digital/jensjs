@@ -1,6 +1,6 @@
 // for index.htm
 
-deferDOM(function onDOMusable() {
+usefulJS.deferDOM(function onDOMusable() {
 	var lst = document.getElementById('sessionlist');
 	var msg = document.getElementById('msg');
 	var tbl = document.getElementById('sessionlisttbl');
@@ -21,10 +21,10 @@ deferDOM(function onDOMusable() {
 	function editOkBtn() {
 		var num = this.data;
 		var elts = ids[num];
-		elts[5] = xhtsafe(elts[1].value);
+		elts[5] = usefulJS.xhtsafe(elts[1].value);
 		elts[1].value = elts[5];
-		elts[0].innerHTML = text2html(elts[5]);
-		ezXHR(function postEvent(status, response, xhr) {
+		elts[0].innerHTML = usefulJS.text2html(elts[5]);
+		usefulJS.ezXHR(function postEvent(status, response, xhr) {
 			if (status === 204) {
 				elts[0].className = "";
 				elts[1].className = "hidden";
@@ -58,7 +58,7 @@ deferDOM(function onDOMusable() {
 				console.error("no integer: " + j[i][0]);
 				return;
 			}
-			elts[5] = xhtsafe(j[i][2]);
+			elts[5] = usefulJS.xhtsafe(j[i][2]);
 
 			r = tbl.insertRow();
 			c = r.insertCell();
@@ -75,7 +75,7 @@ deferDOM(function onDOMusable() {
 			c.appendChild(e);
 			c = r.insertCell();
 			e = document.createElement('span');
-			e.innerHTML = text2html(elts[5]);
+			e.innerHTML = usefulJS.text2html(elts[5]);
 			elts[0] = e; // inner text span
 			c.appendChild(e);
 			e = document.createElement('textarea');
@@ -116,7 +116,7 @@ deferDOM(function onDOMusable() {
 		lst.removeChild(msg);
 	}
 	msg.innerText = "Loading…";
-	ezXHR(function xhrEvent(status, response, xhr) {
+	usefulJS.ezXHR(function xhrEvent(status, response, xhr) {
 		if (status === 200)
 			processResult(JSON.parse(response));
 		else

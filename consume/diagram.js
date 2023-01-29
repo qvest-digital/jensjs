@@ -18,13 +18,13 @@ g.onHashChange = function onHashChange(newhash, ign) {
     };
 
 g.reload = function reload() {
-	g.id = String(hashlib.get('id'));
+	g.id = String(usefulJS.hashlib.get('id'));
 	if (!/^[1-9][0-9]*$/.test(g.id)) {
 		alert("invalid ID: " + g.id);
 		return;
 	}
 	g.loading(true);
-	ezXHR(g.reload1, '/api/session?id=' + g.id);
+	usefulJS.ezXHR(g.reload1, '/api/session?id=' + g.id);
     };
 
 g.reload1 = function reload1(status, response, xhr) {
@@ -44,9 +44,9 @@ g.reload1 = function reload1(status, response, xhr) {
 	    " • <b>Time 0:</b> <tt>" + usefulJS.ISO8601(data.ms) + "</tt>" +
 	    " • <b>timestamp:</b> <tt>" + usefulJS.ISO8601(data.ts) + "</tt>" +
 	    " • <b>comment:</b> " + (data.c == "" ? "<i>(none)</i>" :
-	    text2html(xhtsafe(data.c)));
+	    usefulJS.text2html(usefulJS.xhtsafe(data.c)));
 	g.loading(1); // number of AJAX requests we’ll start
-	ezXHR(g.reload_qdelay, '/api/session/qdelay?id=' + g.id);
+	usefulJS.ezXHR(g.reload_qdelay, '/api/session/qdelay?id=' + g.id);
 	g.loading(false); // for myself
     };
 
@@ -64,7 +64,7 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
 	g.loading(false);
     };
 
-deferDOM(function onDOMReady() {
+usefulJS.deferDOM(function onDOMReady() {
 	g.loadingelt = document.getElementById('loadingelt');
 	g.sesprop = document.getElementById('sesprop');
 	g.gLatency = new Dygraph(document.getElementById('divLatency'),
@@ -90,6 +90,6 @@ deferDOM(function onDOMReady() {
 		"labels": ["time", "qdelay", "OWD"],
 		"resizable": "passive"
 	    });
-	hashlib(g.onHashChange);
+	usefulJS.hashlib(g.onHashChange);
 	g.reload(); // initial load
     });
