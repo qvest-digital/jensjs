@@ -121,12 +121,16 @@ usefulJS.deferDOM(function onDOMReady() {
 				"digitsAfterDecimal": 6
 			}
 		},
-		"connectSeparatedPoints": true,
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "Mbit/s",
 		"labels": ["time", "load", "capacity"],
 		"resizable": "passive"
+	    });
+	g.sync = Dygraph.synchronize([
+		g.gLatency, g.gBW,
+	    ], {
+		"range": false
 	    });
 	usefulJS.hashlib(g.onHashChange);
 	g.reload(); // initial load

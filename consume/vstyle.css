@@ -163,4 +163,9 @@ tt,
 	width:auto;
 }
 
+#divBandwidth .dygraph-legend {
+	white-space:nowrap;
+	width:auto;
+}
+
 /* EOF */

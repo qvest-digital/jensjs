@@ -88,22 +88,26 @@ BEGIN
 		ORDER BY ts;
 	CREATE VIEW fbandwidth (dts, load, capacity) AS
 		WITH
-		    load AS (
-			SELECT ts, sum(len) OVER (
-				-- XXX 1 PRECEDING means one-second sliding window
-				-- XXX might desire making that configurable
-				ORDER BY ts RANGE BETWEEN 1 PRECEDING AND CURRENT ROW
-			    ) * 8 AS bitspersecond
-			FROM p),
-		    capacity AS (
-			SELECT ts, bwlim FROM q),
 		    merged AS (
-			SELECT ts, bitspersecond, bwlim FROM load
-			FULL OUTER JOIN capacity USING (ts))
+			SELECT ts, len, bwlim,
+			    -- https://dba.stackexchange.com/a/105828/65843
+			    count(bwlim) OVER (ORDER BY ts) AS ct
+			FROM p FULL OUTER JOIN q USING (ts)),
+		    aggregated AS (
+			SELECT ts, len AS pktsizebytes, bwlim, ct,
+			    sum(len) OVER (
+				ORDER BY ts
+				-- XXX 0.1 PRECEDING ⇒ 100ms sliding window
+				-- XXX might desire making that configurable
+				RANGE BETWEEN 0.1 PRECEDING AND CURRENT ROW
+			    -- 10 * 0.1 (above) must equal 1
+			    ) * 10 * 8 AS bps,
+			    min(bwlim) OVER (PARTITION BY ct) AS bw
+			FROM merged)
 		SELECT ts - d,
-		    (bitspersecond::NUMERIC(10,0) / 1000000)::NUMERIC(10,6),
-		    (bwlim::NUMERIC(10,0) / 1000000)::NUMERIC(10,6)
-		FROM merged, o ORDER BY ts;
+		    (COALESCE(bps, 0)::NUMERIC(10,0) / 1000000)::NUMERIC(10,6),
+		    (bw::NUMERIC(10,0) / 1000000)::NUMERIC(10,6)
+		FROM aggregated, o ORDER BY ts;
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';
