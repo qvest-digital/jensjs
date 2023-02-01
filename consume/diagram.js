@@ -45,8 +45,9 @@ g.reload1 = function reload1(status, response, xhr) {
 	    " • <b>timestamp:</b> <tt>" + usefulJS.ISO8601(data.ts) + "</tt>" +
 	    " • <b>comment:</b> " + (data.c == "" ? "<i>(none)</i>" :
 	    usefulJS.text2html(usefulJS.xhtsafe(data.c)));
-	g.loading(1); // number of AJAX requests we’ll start
+	g.loading(2); // number of AJAX requests we’ll start
 	usefulJS.ezXHR(g.reload_qdelay, '/api/session/qdelay?id=' + g.id);
+	usefulJS.ezXHR(g.reload_bw, '/api/session/bandwidth?id=' + g.id);
 	g.loading(false); // for myself
     };
 
@@ -61,6 +62,19 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
 	var data = ('[[' + response).slice(0, -1) + ']]';
 	data = JSON.parse(data.replace(g.re_nl, '],['));
 	g.gLatency.updateOptions({"file": data});
+	g.loading(false);
+    };
+
+g.reload_bw = function reload_bw(status, response, xhr) {
+	if (status !== 200 || response === "") {
+		g.loading(false);
+		alert("loading qdelay failed with HTTP status " +
+		    status + " " + xhr.statusText);
+		return;
+	}
+	var data = ('[[' + response).slice(0, -1) + ']]';
+	data = JSON.parse(data.replace(g.re_nl, '],['));
+	g.gBW.updateOptions({"file": data});
 	g.loading(false);
     };
 
@@ -88,6 +102,30 @@ usefulJS.deferDOM(function onDOMReady() {
 		"xLabelHeight": 0,
 		"ylabel": "milliseconds",
 		"labels": ["time", "qdelay", "OWD"],
+		"resizable": "passive"
+	    });
+	g.gBW = new Dygraph(document.getElementById('divBandwidth'),
+	    /* initial dummy data */ [[0,0,0],[1,1,1]], {
+		"axes": {
+			"x": {
+				"valueFormatter": function (x) {
+					return (String(Number(x).toFixed(6))
+					    .replace(/...$/, " $&"));
+				    },
+				"pixelsPerLabel": 40
+			},
+			"y": {
+				"digitsAfterDecimal": 6
+			},
+			"y2": {
+				"digitsAfterDecimal": 6
+			}
+		},
+		"connectSeparatedPoints": true,
+		"xlabel": "s",
+		"xLabelHeight": 0,
+		"ylabel": "Mbit/s",
+		"labels": ["time", "load", "capacity"],
 		"resizable": "passive"
 	    });
 	usefulJS.hashlib(g.onHashChange);

@@ -65,14 +65,14 @@ BEGIN
 		WITH
 		    p1 AS (
 			SELECT ts, NULL::NUMERIC(20,9) AS tsofs
-				FROM p ORDER BY pk LIMIT 1),
+			FROM p ORDER BY pk LIMIT 1),
 		    q1 AS (
 			SELECT ts, tsofs FROM q ORDER BY pk LIMIT 1),
 		    pq1 AS (
 			SELECT * FROM p1
 			UNION ALL
 			SELECT * FROM q1
-				ORDER BY ts LIMIT 1),
+			ORDER BY ts LIMIT 1),
 		    pq0 AS (
 			SELECT pq1.ts, q1.tsofs FROM pq1, q1),
 		    a1 AS (
@@ -83,6 +83,27 @@ BEGIN
 		    fa1 AS (
 			SELECT ia1.*, ts - fabs AS d FROM ia1)
 		SELECT iabs, d FROM fa1;
+	CREATE VIEW fqdelay (dts, msdelay, mslatency) AS
+		SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o
+		ORDER BY ts;
+	CREATE VIEW fbandwidth (dts, load, capacity) AS
+		WITH
+		    load AS (
+			SELECT ts, sum(len) OVER (
+				-- XXX 1 PRECEDING means one-second sliding window
+				-- XXX might desire making that configurable
+				ORDER BY ts RANGE BETWEEN 1 PRECEDING AND CURRENT ROW
+			    ) * 8 AS bitspersecond
+			FROM p),
+		    capacity AS (
+			SELECT ts, bwlim FROM q),
+		    merged AS (
+			SELECT ts, bitspersecond, bwlim FROM load
+			FULL OUTER JOIN capacity USING (ts))
+		SELECT ts - d,
+		    (bitspersecond::NUMERIC(10,0) / 1000000)::NUMERIC(10,6),
+		    (bwlim::NUMERIC(10,0) / 1000000)::NUMERIC(10,6)
+		FROM merged, o ORDER BY ts;
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';

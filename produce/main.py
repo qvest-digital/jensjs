@@ -178,8 +178,23 @@ def API_Session_qdelay(rh, u, qs):
         rh.send_header("Content-Type", "text/plain")
         rh.end_headers()
         csr.copy_expert("""COPY (
-            SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o ORDER BY ts
+            SELECT * FROM fqdelay
           ) TO STDOUT WITH (DELIMITER ',')""", rh.wfile)
+
+@Path("/api/session/bandwidth")
+def API_Session_bandwidth(rh, u, qs):
+    session_id = qs_int(rh, qs, 'id')
+    if session_id is None: return  # pylint: disable=multiple-statements
+    with JJSDB() as csr:
+        if API_Session_enter(csr, session_id):
+            rh.send_error(404, 'session not found')
+            return
+        rh.send_response(200)
+        rh.send_header("Content-Type", "text/plain")
+        rh.end_headers()
+        csr.copy_expert("""COPY (
+            SELECT * FROM fbandwidth
+          ) TO STDOUT WITH (DELIMITER ',', NULL 'null')""", rh.wfile)
 
 # …
 
