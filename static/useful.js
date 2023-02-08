@@ -151,8 +151,10 @@ G.date2mjd = function date2mjd(dateobject) {
 	return ([mjd, sec]);
     };
 
-G.mjd2date = function mjd2date(mjd, sec) {
+G.mjd2date = function mjd2date(mjd, sec, return_millis) {
 	var s = (mjd - 40587) * 86400 + sec;
+	if (return_millis)
+		return (s * 1000);
 	return (new Date(s * 1000));
     };
 
@@ -216,6 +218,15 @@ G.xhtsafe = (function _closure_xhtsafe() {
 G.deferDOM = (function _closure_deferDOM() {
 	if (typeof(document) === "undefined")
 		return (_needsdom);
+	/* possibly skip all that setup */
+	var _ready = function deferDOM_alreadyComplete(cb) {
+		if (typeof(cb) === "function")
+			cb();
+		return (true);
+	    };
+	if (document.readyState === "complete")
+		return (_ready);
+	/* note: we check again below, DOM can get ready during execution */
 
 	var called = false;
 	var tmo = false;
@@ -284,8 +295,12 @@ G.deferDOM = (function _closure_deferDOM() {
 	}
 
 	/* already loaded? */
-	if (document.readyState === "complete")
+	if (document.readyState === "complete") {
+		/* undo all that attaching */
 		handler();
+		/* skip longer function from below */
+		return (_ready);
+	}
 
 	/* function that is called by the user */
 	return (function deferDOM(cb) {
