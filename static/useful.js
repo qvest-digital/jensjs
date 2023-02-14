@@ -384,7 +384,7 @@ G.deferDOM = (function _closure_deferDOM() {
 /**
  * Usage:
  *
- * • hashlib(cb);
+ * • hashlib(cb) → hashlib
  *   initialise hashlib if not yet done and, if cb is a function,
  *   register it to be called on document hash change, cumulative
  * • hashlib.get(key) → String|null|Array[String|null]|undefined
@@ -406,11 +406,10 @@ G.hashlib = (function _closure_hashlib() {
 	if (typeof(document) === "undefined")
 		return (_needsdom);
 
-	var initialised = false;
 	var set_initiated = false;
 	var callbacks = [];
 	var prevhash = "";
-	var checkhash = function checkhash() {
+	var checkhash = function hashlib_checkhash() {
 		var newhash = String(document.location.href.split("#")[1] || "");
 		if (prevhash !== newhash) {
 			var ign = set_initiated;
@@ -448,7 +447,7 @@ G.hashlib = (function _closure_hashlib() {
 		}
 	    });
 	var h2c = /%2C/ig;
-	var genhash = function genhash() {
+	var genhash = function hashlib_genhash() {
 		var res = [], i, j, vals, key;
 		for (i = 0; i < keys.length; ++i) {
 			key = encodeURIComponent(keys[i]);
@@ -468,7 +467,7 @@ G.hashlib = (function _closure_hashlib() {
 		}
 		return (res.join("&").replace(h2c, ","));
 	    };
-	var updhash = function updhash() {
+	var updhash = function hashlib_updhash() {
 		var newhash = genhash();
 		if (!newhash.length)
 			newhash = " ";
@@ -516,8 +515,8 @@ G.hashlib = (function _closure_hashlib() {
 		values = {};
 		updhash();
 	    };
-	var hl_initialise = function hl_initialise(hl) {
-		initialised = true;
+	var hl_initialise = function hashlib_initialise(hl) {
+		hl_initialise = false;
 		if (typeof(window.onhashchange) !== "undefined" &&
 		    (document.documentMode === undefined || document.documentMode > 7))
 			window.onhashchange = checkhash;
@@ -530,10 +529,11 @@ G.hashlib = (function _closure_hashlib() {
 		hl.clear = hl_clear;
 	    };
 	var hl = function hashlib(cb) {
-		if (!initialised)
+		if (hl_initialise !== false)
 			hl_initialise(hl);
 		if (typeof(cb) === "function")
 			callbacks.push(cb);
+		return (hl);
 	    };
 	// ONLY for debugging!
 	//hl.getValues = function hl_getv() { return (values); };
