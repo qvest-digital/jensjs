@@ -299,6 +299,7 @@ G.deferDOM = (function _closure_deferDOM() {
 		var i;
 		for (i = 0; i < callbackfns.length; ++i)
 			callbackfns[i]();
+		delete callbackfns;
 	    };
 
 	/* install DOM readiness listeners */
