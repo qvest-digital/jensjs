@@ -31,7 +31,7 @@ class JJSDB:
         conn = self.csr.connection
         try:
             self.csr.close()
-            _dbpool.putconn(conn, close=(exc_value is not None))
+            _dbpool.putconn(conn, close=(exc_value is not None))  # pylint: disable=superfluous-parens
         except:  # noqa: E722
             _dbpool.putconn(conn, close=True)
             raise
