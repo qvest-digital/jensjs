@@ -28,7 +28,7 @@
         {
           "uses": "github/codeql-action/upload-sarif@codeql-bundle-20230105",
           "with": {
-            "sarif_file": "editedresults.sarif"
+            "sarif_file": "results.sarif"
           }
         }
       ]
