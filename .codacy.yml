@@ -2,7 +2,7 @@
 engines:
   pylint:
     # pylintpython3 is used instead
-    #enabled: false
+    enabled: false
   tsqllint:
     # for Microsoft only
     enabled: false
