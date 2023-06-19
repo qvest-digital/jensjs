@@ -9,7 +9,9 @@ my $dbhp = DBI->connect("dbi:Pg:", '', '',
 my $dbhq = DBI->connect("dbi:Pg:", '', '',
     {AutoCommit => 1, RaiseError => 1});
 
-my $sid = $dbhp->selectall_arrayref('SELECT jensjs.new_session()')->[0]->[0];
+my $sessname = shift;
+my $sid = $dbhp->selectall_arrayref('SELECT jensjs.new_session($1)',
+    {}, $sessname)->[0]->[0];
 $dbhq->do('SELECT jensjs.use_session($1)', undef, $sid);
 
 my $np;

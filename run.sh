@@ -122,7 +122,7 @@ pypid=$!
 print -ru2 -- I: run.sh: starting acquire
 {
 	sleep 1
-	exec mksh acquire/main.sh $dokeep 0<&4
+	exec mksh acquire/main.sh 'unnamed session from run.sh' $dokeep 0<&4
 } &
 shpid=$!
 wait $shpid

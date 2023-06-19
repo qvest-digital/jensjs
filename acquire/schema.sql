@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 	ts0 BIGINT NOT NULL DEFAULT 0,
 	pk SERIAL PRIMARY KEY,
 	schemaname TEXT GENERATED ALWAYS AS ('jjs' || pk::text) STORED,
-	comment TEXT NOT NULL DEFAULT ''
+	comment TEXT NOT NULL
 );
 
 -- https://www.postgresql.org/docs/current/catalog-pg-type.html
@@ -24,13 +24,13 @@ CREATE OR REPLACE VIEW tabletetris
     ORDER BY n.nspname ASC, c.relname ASC,
 	t.typlen DESC, t.typalign DESC, a.attnum ASC;
 
-CREATE OR REPLACE FUNCTION new_session()
+CREATE OR REPLACE FUNCTION new_session(IN name TEXT)
     RETURNS TEXT AS $$
 DECLARE
 	sid TEXT;
 BEGIN
-	INSERT INTO jensjs.sessions (ts)
-	    VALUES (CURRENT_TIMESTAMP)
+	INSERT INTO jensjs.sessions (ts, comment)
+	    VALUES (CURRENT_TIMESTAMP, name)
 	    RETURNING schemaname INTO sid;
 	EXECUTE format('CREATE SCHEMA %I;', sid);
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
