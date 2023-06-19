@@ -23,6 +23,7 @@ g.reload = function reload() {
 		alert("invalid ID: " + g.id);
 		return;
 	}
+	g.sessnum.innerHTML = g.id;
 	g.loading(true);
 	usefulJS.ezXHR(g.reload1, '/api/session?id=' + g.id);
     };
@@ -90,6 +91,7 @@ g.reload_bw = function reload_bw(status, response, xhr) {
 
 usefulJS.deferDOM(function onDOMReady() {
 	g.loadingelt = document.getElementById('loadingelt');
+	g.sessnum = document.getElementById('sessnum');
 	g.sesprop = document.getElementById('sesprop');
 	g.gLatency = new Dygraph(document.getElementById('divLatency'),
 	    /* initial dummy data */ [[0,0,0],[1,1,1]], {
