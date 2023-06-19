@@ -68,6 +68,7 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
 	var data = ('[[' + response).slice(0, -1) + ']]';
 	data = JSON.parse(data.replace(g.re_nl, '],['));
 	g.gLatency.updateOptions({"file": data});
+	g.ndyelt.classList.add("loaded-qdelay");
 	g.loading(false);
     };
 
@@ -86,10 +87,12 @@ g.reload_bw = function reload_bw(status, response, xhr) {
 	var data = ('[[' + response).slice(0, -1) + ']]';
 	data = JSON.parse(data.replace(g.re_nl, '],['));
 	g.gBW.updateOptions({"file": data});
+	g.ndyelt.classList.add("loaded-bw");
 	g.loading(false);
     };
 
 usefulJS.deferDOM(function onDOMReady() {
+	g.ndyelt = document.getElementById('ndyelt');
 	g.loadingelt = document.getElementById('loadingelt');
 	g.sessnum = document.getElementById('sessnum');
 	g.sesprop = document.getElementById('sesprop');

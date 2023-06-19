@@ -74,6 +74,20 @@ tt,
 	margin:-7px 2px -7px 2px;
 }
 
+#ndyelt {
+	position:absolute;
+		top:30%;
+		left:30%;
+	background-color:#FFFF00;
+	color:#000000;
+	font-size:36pt;
+	padding:1ex;
+	border:3px dashed #000000;
+}
+#ndyelt.loaded-qdelay.loaded-bw {
+	display:none;
+}
+
 #loadingelt {
 	z-index:16383;
 	position:fixed;
