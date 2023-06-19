@@ -53,10 +53,15 @@ g.reload1 = function reload1(status, response, xhr) {
 
 g.re_nl = /\n/g;
 g.reload_qdelay = function reload_qdelay(status, response, xhr) {
-	if (status !== 200 || response === "") {
+	if (status !== 200) {
 		g.loading(false);
 		alert("loading qdelay failed with HTTP status " +
 		    status + " " + xhr.statusText);
+		return;
+	}
+	if (response === "") {
+		g.loading(false);
+		console.log("loading qdelay returned no data (yet)");
 		return;
 	}
 	var data = ('[[' + response).slice(0, -1) + ']]';
@@ -66,10 +71,15 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
     };
 
 g.reload_bw = function reload_bw(status, response, xhr) {
-	if (status !== 200 || response === "") {
+	if (status !== 200) {
 		g.loading(false);
-		alert("loading qdelay failed with HTTP status " +
+		alert("loading bw failed with HTTP status " +
 		    status + " " + xhr.statusText);
+		return;
+	}
+	if (response === "") {
+		g.loading(false);
+		console.log("loading bw returned no data (yet)");
 		return;
 	}
 	var data = ('[[' + response).slice(0, -1) + ']]';

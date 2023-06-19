@@ -133,8 +133,13 @@ BEGIN
 	SET search_path TO jensjs, public;
 	SELECT schemaname INTO STRICT sid FROM jensjs.sessions WHERE pk=num;
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
-	SELECT ofs INTO STRICT zts FROM o;
-	UPDATE sessions SET ts0=zts WHERE pk=num;
+	BEGIN
+		SELECT ofs INTO STRICT zts FROM o;
+		UPDATE sessions SET ts0=zts WHERE pk=num;
+	EXCEPTION
+	    WHEN NO_DATA_FOUND THEN
+		RAISE NOTICE 'no data yet';
+	END;
 	RETURN sessions FROM sessions WHERE pk=num;
 END;
 $$ LANGUAGE 'plpgsql';
