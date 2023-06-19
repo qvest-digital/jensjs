@@ -23,7 +23,7 @@ sub pbeg {
 		(ts, owd, qdelay, chance, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
 		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
 	});
-	$np = 0;
+	$np = 127;
 }
 &pbeg;
 
@@ -32,7 +32,7 @@ sub qbeg {
 		(ts, membytes, npkts, handover, bwlim, tsofs)
 		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
 	});
-	$nq = 0;
+	$nq = 127;
 }
 &qbeg;
 
@@ -40,14 +40,14 @@ while (<STDIN>) {
 	if (/^\"p\"\t/) {
 		s///;
 		$dbhp->pg_putcopydata($_);
-		if (++$np > 128) {
+		if (++$np >= 128) {
 			$dbhp->pg_putcopyend();
 			&pbeg;
 		}
 	} elsif (/^\"q\"\t/) {
 		s///;
 		$dbhq->pg_putcopydata($_);
-		if (++$nq > 128) {
+		if (++$nq >= 128) {
 			$dbhq->pg_putcopyend();
 			&qbeg;
 		}
