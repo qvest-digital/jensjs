@@ -93,7 +93,9 @@ BEGIN
 			SELECT ts, len, bwlim,
 			    -- https://dba.stackexchange.com/a/105828/65843
 			    count(bwlim) OVER (ORDER BY ts) AS ct
-			FROM p FULL OUTER JOIN q USING (ts)),
+			FROM p FULL OUTER JOIN q USING (ts)
+			WHERE p.isdrop=false
+		    ),
 		    aggregated AS (
 			SELECT ts, len AS pktsizebytes, bwlim, ct,
 			    sum(len) OVER (
