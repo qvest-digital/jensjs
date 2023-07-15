@@ -90,7 +90,7 @@ BEGIN
 		WITH
 		    prefiltered AS (
 			SELECT ts, len FROM p
-			WHERE p.isdrop = FALSE
+			WHERE NOT p.isdrop
 		    ),
 		    merged AS (
 			SELECT ts, len, bwlim,
