@@ -88,12 +88,15 @@ BEGIN
 		ORDER BY ts;
 	CREATE VIEW fbandwidth (dts, load, capacity) AS
 		WITH
+		    prefiltered AS (
+			SELECT ts, len FROM p
+			WHERE p.isdrop = FALSE
+		    ),
 		    merged AS (
 			SELECT ts, len, bwlim,
 			    -- https://dba.stackexchange.com/a/105828/65843
 			    count(bwlim) OVER (ORDER BY ts) AS ct
-			FROM p FULL OUTER JOIN q USING (ts)
-			WHERE p.isdrop = FALSE
+			FROM prefiltered FULL OUTER JOIN q USING (ts)
 		    ),
 		    aggregated AS (
 			SELECT ts, len AS pktsizebytes, bwlim, ct,
