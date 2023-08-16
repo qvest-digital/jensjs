@@ -151,6 +151,7 @@ usefulJS.deferDOM(function onDOMReady() {
 		"ylabel": "Mbit/s",
 		"labels": ["time", "load", "capacity", "pktsz"],
 		"visibility": [true, true, false],
+		"connectSeparatedPoints": true,
 		"legendFormatter": newFormatter,
 		"resizable": "passive"
 	    });
