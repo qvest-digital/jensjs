@@ -123,9 +123,10 @@ usefulJS.deferDOM(function onDOMReady() {
 	var newFormatter = function newFormatter(data) {
 		if (typeof(data.x) !== 'undefined') {
 			data.series[2].isVisible = true;
-			data.series[2].yHTML = data.dygraph.rawData_[data.i][3] + 'b';
+			data.series[2].y = data.dygraph.getValue(data.i, 3);
+			if (data.series[2].y !== null)
+				data.series[2].yHTML = data.series[2].y + 'b';
 		}
-		console.log(data.series);
 		return (oldFormatter(data));
 	};
 	g.gBW = new Dygraph(document.getElementById('divBandwidth'),
