@@ -92,27 +92,36 @@ BEGIN
 			SELECT ts, len FROM p
 			WHERE NOT p.isdrop
 		    ),
-		    merged AS (
-			SELECT ts, len, bwlim,
-			    -- https://dba.stackexchange.com/a/105828/65843
-			    count(bwlim) OVER (ORDER BY ts) AS ct
-			FROM prefiltered FULL OUTER JOIN q USING (ts)
-		    ),
-		    aggregated AS (
-			SELECT ts, len AS pktsizebytes, bwlim, ct,
+		    counted AS (
+			SELECT ts, len AS pktsizebytes,
 			    sum(len) OVER (
 				ORDER BY ts
-				-- XXX 0.1 PRECEDING ⇒ 100ms sliding window
-				-- XXX might desire making that configurable
-				RANGE BETWEEN 0.1 PRECEDING AND CURRENT ROW
-			    -- 10 * 0.1 (above) must equal 1
-			    ) * 10 * 8 AS bps,
+				-- 0.1 PRECEDING ⇒ 100ms sliding window
+				RANGE BETWEEN 0.1 PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW
+			    ) AS lensum, min(ts) OVER (
+				ORDER BY ts
+				-- same sliding window as above!
+				RANGE BETWEEN 0.1 PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW
+			    ) AS tsmin
+			FROM prefiltered
+		    ),
+		    merged AS (
+			SELECT ts, pktsizebytes, lensum, tsmin, bwlim,
+			    -- https://dba.stackexchange.com/a/105828/65843
+			    count(bwlim) OVER (ORDER BY ts) AS ct
+			FROM counted FULL OUTER JOIN q USING (ts)
+		    ),
+		    divided AS (
+			SELECT ts, pktsizebytes,
+			    8 * lensum / NULLIF(ts - tsmin, 0) AS bps,
 			    min(bwlim) OVER (PARTITION BY ct) AS bw
-			FROM merged)
-		SELECT ts - d,
-		    (COALESCE(bps, 0)::NUMERIC(10,0) / 1000000)::NUMERIC(10,6),
-		    (bw::NUMERIC(10,0) / 1000000)::NUMERIC(10,6)
-		FROM aggregated, o ORDER BY ts;
+			FROM merged
+		    )
+		SELECT ts - d AS dts,
+		    (bps::NUMERIC(10,0) / 1000000)::NUMERIC(10,6) AS load,
+		    (bw::NUMERIC(10,0) / 1000000)::NUMERIC(10,6) AS capacity,
+		    pktsizebytes
+		FROM divided, o ORDER BY ts;
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';
