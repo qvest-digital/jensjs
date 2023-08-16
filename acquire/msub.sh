@@ -1,7 +1,7 @@
 #!/bin/mksh
 # shellcheck shell=ksh
 
-trap 'print -ru2 -- I: acquire($1): got SIGINT, exiting; exit 0' INT
+trap 'print -ru2 -- "I: acquire($1): got SIGINT, exiting"; exit 0' INT
 
 # change to script directory
 cd "$(realpath "$0/..")" || {
