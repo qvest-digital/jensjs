@@ -86,7 +86,7 @@ BEGIN
 	CREATE VIEW fqdelay (dts, msdelay, mslatency) AS
 		SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o
 		ORDER BY ts;
-	CREATE VIEW fbandwidth (dts, load, capacity) AS
+	CREATE VIEW fbandwidth (dts, load, capacity, pktsizebytes) AS
 		WITH
 		    prefiltered AS (
 			SELECT ts, len FROM p

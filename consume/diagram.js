@@ -119,8 +119,17 @@ usefulJS.deferDOM(function onDOMReady() {
 		"labels": ["time", "qdelay", "OWD"],
 		"resizable": "passive"
 	    });
+	var oldFormatter = Dygraph._require('dygraphs/src/plugins/legend.js').defaultFormatter;
+	var newFormatter = function newFormatter(data) {
+		if (typeof(data.x) !== 'undefined') {
+			data.series[2].isVisible = true;
+			data.series[2].yHTML = data.dygraph.rawData_[data.i][3] + 'b';
+		}
+		console.log(data.series);
+		return (oldFormatter(data));
+	};
 	g.gBW = new Dygraph(document.getElementById('divBandwidth'),
-	    /* initial dummy data */ [[0,0,0],[1,1,1]], {
+	    /* initial dummy data */ [[0,0,0,null],[1,1,1,null]], {
 		"axes": {
 			"x": {
 				"valueFormatter": function (x) {
@@ -139,7 +148,9 @@ usefulJS.deferDOM(function onDOMReady() {
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "Mbit/s",
-		"labels": ["time", "load", "capacity"],
+		"labels": ["time", "load", "capacity", "pktsz"],
+		"visibility": [true, true, false],
+		"legendFormatter": newFormatter,
 		"resizable": "passive"
 	    });
 	g.sync = Dygraph.synchronize([
