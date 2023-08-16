@@ -185,7 +185,7 @@ exec 5<&p
 shpid=$!
 exec 5<&-
 sleep 3
-if ! kill -0 $shpid; then
+if ! kill -0 "$shpid"; then
 	print -ru2 "E: mrun.sh: acquire for UE#0 not running any longer"
 	cleanup 1
 fi
@@ -209,7 +209,7 @@ while (( ++hnum < handles )); do
 done
 sleep 3
 (( hnum = handles - 1 ))
-if ! kill -0 ${shpid[hnum]}; then
+if ! kill -0 "${shpid[hnum]}"; then
 	print -ru2 "E: mrun.sh: acquire for UE#${hnum#16#} not running any longer"
 	cleanup 1
 fi
