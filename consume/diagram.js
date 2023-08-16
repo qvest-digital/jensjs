@@ -153,6 +153,47 @@ usefulJS.deferDOM(function onDOMReady() {
 		"visibility": [true, true, false],
 		"connectSeparatedPoints": true,
 		"legendFormatter": newFormatter,
+		"underlayCallback": function (ctx, area, dy) {
+			var canvasx = function point2canvasx(point) {
+				return (area.w * point.x + area.x);
+			};
+			var points = dy.layout_.points[0];
+			var pl = points.length - 1;
+			if (pl < 3)
+				return;
+			if (points[pl].xval == points[0].xval)
+				return;
+			var elts = [];
+			var pps = (canvasx(points[pl]) - canvasx(points[0])) /
+			    (points[pl].xval - points[0].xval);
+			pps = pps * 8 / 1000000;
+			for (var i = 0; i < pl; ++i) {
+				var point = points[i];
+				var cx = canvasx(point);
+				if (cx < 0)
+					continue;
+				var len = dy.getValue(point.idx, 3);
+				if (len === null)
+					continue;
+				var rate = dy.getValue(point.idx, 2);
+				var w = len * pps / rate;
+				if (w < 3)
+					return;
+				elts.push([cx, w]);
+			}
+			ctx.save();
+			var y = 0;
+			pl = elts.length;
+			for (var i = 0; i < pl; ++i) {
+				var e = elts[i];
+				ctx.fillStyle = "#000000";
+				ctx.fillRect(e[0], y, e[1], 4);
+				ctx.fillStyle = "#E2001A";
+				ctx.fillRect(e[0] + 1, y + 1, e[1] - 2, 2);
+				y ^= 4;
+			}
+			ctx.restore();
+		},
 		"resizable": "passive"
 	    });
 	g.sync = Dygraph.synchronize([
