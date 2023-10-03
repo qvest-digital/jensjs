@@ -23,7 +23,7 @@
           }
         },
         {
-          "run": "jq -c '.runs |= map(select(.tool.driver.name != \"Pylint (reported by Codacy)\" and .tool.driver.name != \"Tsqllint (reported by Codacy)\"))' <results.sarif >editedresults.sarif"
+          "run": "jq -c '.runs |= map(select(.tool.driver.name != \"Tsqllint (reported by Codacy)\"))' <results.sarif >editedresults.sarif"
         },
         {
           "uses": "github/codeql-action/upload-sarif@codeql-bundle-20230105",
