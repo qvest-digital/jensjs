@@ -113,6 +113,19 @@ usefulJS.deferDOM(function onDOMReady() {
 				"digitsAfterDecimal": 3
 			}
 		},
+		"series": {
+			"vqdelay": {
+				"color": "#0000FF"
+			},
+			"rqdelay": {
+				"color": "#00FF00",
+				"strokeWidth": 2
+			},
+			"OWD": {
+				"color": "#FF0000",
+				"strokePattern": [4, 4]
+			}
+		},
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "milliseconds",
