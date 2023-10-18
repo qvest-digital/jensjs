@@ -78,8 +78,8 @@ BEGIN
 		    a1 AS (
 			SELECT ts, tsofs, ts + tsofs AS abs1 FROM pq0),
 		    ia1 AS (
-			SELECT ts, tsofs, abs1, abs1::BIGINT AS iabs,
-			    abs1 - abs1::BIGINT AS fabs FROM a1),
+			SELECT ts, tsofs, abs1, TRUNC(abs1)::BIGINT AS iabs,
+			    abs1 - TRUNC(abs1) AS fabs FROM a1),
 		    fa1 AS (
 			SELECT ia1.*, ts - fabs AS d FROM ia1)
 		SELECT iabs, d FROM fa1;
@@ -117,8 +117,8 @@ BEGIN
 			FROM calculated
 		    )
 		SELECT ts - d AS dts,
-		    (bps::NUMERIC(10,0) / 1000000)::NUMERIC(10,6) AS load,
-		    (bw::NUMERIC(10,0) / 1000000)::NUMERIC(10,6) AS capacity,
+		    (TRUNC(bps) / 1000000)::NUMERIC(10,6) AS load,
+		    (TRUNC(bw) / 1000000)::NUMERIC(10,6) AS capacity,
 		    pktsizebytes
 		FROM filled, o ORDER BY ts;
 	RETURN sid;
