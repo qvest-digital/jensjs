@@ -23,7 +23,7 @@ perl -MDBI -MDBD::Pg -e '1;' || {
 
 # validate header line from input
 IFS= read -r hdrline
-[[ $hdrline = '"p|q|w","TS.","OWD.|MEMBYTES|wdogscheduled?","QDELAY.|NPKTS|NTOOEARLY","CHANCE|handover?|N50US","ecnin|BWLIM|N1MS","ecnout|TSOFS.|N4MS","bit5?|-|NLATER","mark?|-|(THISDELAY)","drop?|-|(&F8)","flow|-|-","PKTLEN|-|-"' ]] || {
+[[ $hdrline = '"p|q|w","TS.","OWD.|MEMBYTES|wdogscheduled?","QDELAY.|NPKTS|NTOOEARLY","VQ.NOTBEFORE|handover?|N50US","ecnin|BWLIM|N1MS","ecnout|TSOFS.|N4MS","bit5?|-|NLATER","mark?|-|(THISDELAY)","drop?|-|(&F8)","flow|-|-","PKTLEN|-|-"' ]] || {
 	print -ru2 "E: acquire: wrong input format"
 	print -ru2 "N: $hdrline"
 	exit 1

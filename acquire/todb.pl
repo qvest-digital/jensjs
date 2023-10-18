@@ -20,7 +20,7 @@ my $ni = 0;
 
 sub pbeg {
 	$dbhp->do(q{COPY p
-		(ts, owd, qdelay, chance, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
+		(ts, owd, qdelay, vqnb, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
 		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
 	});
 	$np = 127;

@@ -34,14 +34,14 @@ BEGIN
 	    RETURNING schemaname INTO sid;
 	EXECUTE format('CREATE SCHEMA %I;', sid);
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
-	-- (ts, owd, qdelay, chance, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
+	-- (ts, owd, qdelay, vqnb, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
 	CREATE TABLE p (
 		pk BIGSERIAL PRIMARY KEY,
-		chance INTEGER NOT NULL,
 		len INTEGER NOT NULL,
 		ts NUMERIC(20, 9) NOT NULL,
 		owd NUMERIC(20, 9) NOT NULL,
 		qdelay NUMERIC(20, 9) NOT NULL,
+		vqnb NUMERIC(20, 9) NOT NULL,
 		ecnin VARCHAR(2) NOT NULL,
 		ecnout VARCHAR(2) NOT NULL,
 		bitfive BOOLEAN NOT NULL,
@@ -83,8 +83,9 @@ BEGIN
 		    fa1 AS (
 			SELECT ia1.*, ts - fabs AS d FROM ia1)
 		SELECT iabs, d FROM fa1;
-	CREATE VIEW fqdelay (dts, msdelay, mslatency) AS
-		SELECT ts - d, qdelay * 1000, owd * 1000 FROM p, o
+	CREATE VIEW fqdelay (dts, msvdelay, msrdelay, mslatency) AS
+		SELECT ts - d, qdelay * 1000, (qdelay - vqnb) * 1000, owd * 1000
+		FROM p, o
 		ORDER BY ts;
 	CREATE VIEW fbandwidth (dts, load, capacity, pktsizebytes) AS
 		WITH

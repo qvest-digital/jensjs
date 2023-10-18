@@ -97,7 +97,7 @@ usefulJS.deferDOM(function onDOMReady() {
 	g.sessnum = document.getElementById('sessnum');
 	g.sesprop = document.getElementById('sesprop');
 	g.gLatency = new Dygraph(document.getElementById('divLatency'),
-	    /* initial dummy data */ [[0,0,0],[1,1,1]], {
+	    /* initial dummy data */ [[0,0,0,0],[1,1,1,1]], {
 		"axes": {
 			"x": {
 				"valueFormatter": function (x) {
@@ -116,7 +116,7 @@ usefulJS.deferDOM(function onDOMReady() {
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "milliseconds",
-		"labels": ["time", "qdelay", "OWD"],
+		"labels": ["time", "vqdelay", "rqdelay", "OWD"],
 		"resizable": "passive"
 	    });
 	var oldFormatter = Dygraph._require('dygraphs/src/plugins/legend.js').defaultFormatter;
@@ -182,15 +182,26 @@ usefulJS.deferDOM(function onDOMReady() {
 				elts.push([cx, w]);
 			}
 			ctx.save();
-			var y = 0;
+			var y;
+			var yx = [-1];
 			pl = elts.length;
 			for (var i = 0; i < pl; ++i) {
 				var e = elts[i];
+				var x = e[0];
+				var w = e[1];
+				if (x < 0)
+					continue;
+				y = 0;
+				while (x <= yx[y]) {
+					++y;
+					if (y == yx.length)
+						yx.push(-1);
+				}
+				yx[y] = x + w + /* gap */ 1;
 				ctx.fillStyle = "#000000";
-				ctx.fillRect(e[0], y, e[1], 4);
+				ctx.fillRect(x, y * 4, w, 4);
 				ctx.fillStyle = "#E2001A";
-				ctx.fillRect(e[0] + 1, y + 1, e[1] - 2, 2);
-				y ^= 4;
+				ctx.fillRect(x + 1, y * 4 + 1, w - 2, 2);
 			}
 			ctx.restore();
 		},
