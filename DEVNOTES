@@ -10,13 +10,21 @@ Attach to a running instance:
 2. Attach another server on a different port, when code-testing:
 
 	$ </proc/30837/environ xargs -0 mksh -c 'exec env "$@" ./run-produce.sh 8083' --
+	 # or (new)
+	$ ./devattach.sh ./run-produce.sh 8083
 
 3. Attach a PostgreSQL client:
 
 	$ </proc/30837/environ xargs -0o mksh -c 'exec env "$@" psql' --
+	 # or (new)
+	$ ./devattach.sh
 
 4. If needed, enable statement logging:
 
 	postgres=# ALTER SYSTEM SET log_statement TO 'all';
 	postgres=# SELECT pg_reload_conf();
 	$ tail -F /tmp/pg_virtualenv.*/log/postgresql-*-regress.log
+
+5. Enter the session
+
+	postgres=# SELECT jensjs.use_session(1);

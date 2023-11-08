@@ -84,12 +84,15 @@ shpid=
 function cleanup {
 	print -ru2 -- I: run.sh: cleaning up
 	trap - EXIT
+	rm -f .pid
 	[[ -z $pypid ]] || xsendsig "$pypid" -INT
 	[[ -z $shpid ]] || xsendsig "$shpid" -INT
 	exit "$1"
 }
 trap 'cleanup 0' INT
 trap 'cleanup 1' EXIT TERM
+
+echo $$ >.pid
 
 # run python subprocess produce
 {

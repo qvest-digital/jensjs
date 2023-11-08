@@ -131,6 +131,7 @@ set -A jdpids
 function cleanup {
 	print -ru2 -- I: mrun.sh: cleaning up
 	trap - EXIT
+	rm -f .pid
 	[[ -z $pypid ]] || xsendsig "$pypid" -INT
 	[[ -z $shpid ]] || for p in "${shpid[@]}"; do
 		xsendsig "$p" -INT
@@ -142,6 +143,8 @@ function cleanup {
 }
 trap 'cleanup 0' INT
 trap 'cleanup 1' EXIT TERM
+
+echo $$ >.pid
 
 # run python subprocess produce
 {
