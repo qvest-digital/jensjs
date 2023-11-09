@@ -50,11 +50,12 @@ BEGIN
 		flow TEXT NOT NULL
 	);
 	CREATE INDEX p_ts ON p (ts);
-	-- (ts, membytes, npkts, handover, bwlim, tsofs)
+	-- (ts, membytes, npkts, handover, vcap, tsofs, rcap)
 	CREATE TABLE q (
 		pk BIGSERIAL PRIMARY KEY,
 		membytes BIGINT NOT NULL,
-		bwlim BIGINT NOT NULL,
+		vcap BIGINT NOT NULL,
+		rcap BIGINT NOT NULL,
 		npkts INTEGER NOT NULL,
 		handover BOOLEAN NOT NULL,
 		ts NUMERIC(20, 9) NOT NULL,
@@ -94,9 +95,9 @@ BEGIN
 			WHERE NOT p.isdrop
 		    ),
 		    calculated AS (
-			SELECT ts, len AS pktsizebytes, bwlim,
+			SELECT ts, len AS pktsizebytes, vcap as bwlim,
 			    -- https://dba.stackexchange.com/a/105828/65843
-			    count(bwlim) OVER wts AS ct,
+			    count(vcap) OVER wts AS ct,
 			    -- https://stackoverflow.com/a/77051480/2171120
 			    CASE WHEN (COUNT(*) OVER wtim) > 20
 			    THEN 8 * (sum(len) OVER wnum) / NULLIF(ts - min(ts) OVER wnum, 0)

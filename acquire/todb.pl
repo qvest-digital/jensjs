@@ -29,7 +29,7 @@ sub pbeg {
 
 sub qbeg {
 	$dbhq->do(q{COPY q
-		(ts, membytes, npkts, handover, bwlim, tsofs)
+		(ts, membytes, npkts, handover, vcap, tsofs, rcap)
 		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
 	});
 	$nq = 127;
