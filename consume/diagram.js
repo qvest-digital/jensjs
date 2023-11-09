@@ -135,15 +135,15 @@ usefulJS.deferDOM(function onDOMReady() {
 	var oldFormatter = Dygraph._require('dygraphs/src/plugins/legend.js').defaultFormatter;
 	var newFormatter = function newFormatter(data) {
 		if (typeof(data.x) !== 'undefined') {
-			data.series[2].isVisible = true;
-			data.series[2].y = data.dygraph.getValue(data.i, 3);
-			if (data.series[2].y !== null)
-				data.series[2].yHTML = data.series[2].y + 'b';
+			data.series[3].isVisible = true;
+			data.series[3].y = data.dygraph.getValue(data.i, 4);
+			if (data.series[3].y !== null)
+				data.series[3].yHTML = data.series[3].y + 'b';
 		}
 		return (oldFormatter(data));
 	};
 	g.gBW = new Dygraph(document.getElementById('divBandwidth'),
-	    /* initial dummy data */ [[0,0,0,null],[1,1,1,null]], {
+	    /* initial dummy data */ [[0,0,0,0,null],[1,1,1,1,null]], {
 		"axes": {
 			"x": {
 				"valueFormatter": function (x) {
@@ -159,11 +159,25 @@ usefulJS.deferDOM(function onDOMReady() {
 				"digitsAfterDecimal": 6
 			}
 		},
+		"series": {
+			"load": {
+				"color": "#009DE0"
+			},
+			"rcapacity": {
+				"color": "#E6ADEC"
+			},
+			"vcapacity": {
+				"color": "#E20074"
+			},
+			"pktsz": {
+				"color": "#E2001A"
+			}
+		},
 		"xlabel": "s",
 		"xLabelHeight": 0,
 		"ylabel": "Mbit/s",
-		"labels": ["time", "load", "capacity", "pktsz"],
-		"visibility": [true, true, false],
+		"labels": ["time", "load", "rcapacity", "vcapacity", "pktsz"],
+		"visibility": [true, true, true, false],
 		"connectSeparatedPoints": true,
 		"legendFormatter": newFormatter,
 		"underlayCallback": function (ctx, area, dy) {
@@ -185,10 +199,10 @@ usefulJS.deferDOM(function onDOMReady() {
 				var cx = canvasx(point);
 				if (cx < 0)
 					continue;
-				var len = dy.getValue(point.idx, 3);
+				var len = dy.getValue(point.idx, 4);
 				if (len === null)
 					continue;
-				var rate = dy.getValue(point.idx, 2);
+				var rate = dy.getValue(point.idx, 3);
 				var w = len * pps / rate;
 				if (w < 3)
 					return;

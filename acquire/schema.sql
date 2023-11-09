@@ -88,14 +88,14 @@ BEGIN
 		SELECT ts - d, qdelay * 1000, (qdelay - vqnb) * 1000, owd * 1000
 		FROM p, o
 		ORDER BY ts;
-	CREATE VIEW fbandwidth (dts, load, capacity, pktsizebytes) AS
+	CREATE VIEW fbandwidth (dts, load, rcapacity, vcapacity, pktsizebytes) AS
 		WITH
 		    prefiltered AS (
 			SELECT ts, len FROM p
 			WHERE NOT p.isdrop
 		    ),
 		    calculated AS (
-			SELECT ts, len AS pktsizebytes, vcap as bwlim,
+			SELECT ts, len AS pktsizebytes, vcap, rcap,
 			    -- https://dba.stackexchange.com/a/105828/65843
 			    count(vcap) OVER wts AS ct,
 			    -- https://stackoverflow.com/a/77051480/2171120
@@ -115,12 +115,14 @@ BEGIN
 		    ),
 		    filled AS (
 			SELECT ts, pktsizebytes, bps,
-			    min(bwlim) OVER (PARTITION BY ct) AS bw
+			    min(vcap) OVER (PARTITION BY ct) AS vbw,
+			    min(rcap) OVER (PARTITION BY ct) AS rbw
 			FROM calculated
 		    )
 		SELECT ts - d AS dts,
 		    (TRUNC(bps) / 1000000)::NUMERIC(10,6) AS load,
-		    (TRUNC(bw) / 1000000)::NUMERIC(10,6) AS capacity,
+		    (TRUNC(rbw) / 1000000)::NUMERIC(10,6) AS rcapacity,
+		    (TRUNC(vbw) / 1000000)::NUMERIC(10,6) AS vcapacity,
 		    pktsizebytes
 		FROM filled, o ORDER BY ts;
 	RETURN sid;
