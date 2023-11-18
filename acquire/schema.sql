@@ -34,6 +34,7 @@ BEGIN
 	    RETURNING schemaname INTO sid;
 	EXECUTE format('CREATE SCHEMA %I;', sid);
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
+
 	-- (ts, owd, qdelay, vqnb, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
 	CREATE TABLE p (
 		pk BIGSERIAL PRIMARY KEY,
@@ -50,6 +51,7 @@ BEGIN
 		flow TEXT NOT NULL
 	);
 	CREATE INDEX p_ts ON p (ts);
+
 	-- (ts, membytes, npkts, handover, vcap, tsofs, rcap)
 	CREATE TABLE q (
 		pk BIGSERIAL PRIMARY KEY,
@@ -62,6 +64,7 @@ BEGIN
 		tsofs NUMERIC(20, 9) NOT NULL
 	);
 	CREATE INDEX q_ts ON q (ts);
+
 	CREATE VIEW o (ofs, d) AS
 		WITH
 		    p1 AS (
@@ -84,10 +87,12 @@ BEGIN
 		    fa1 AS (
 			SELECT ia1.*, ts - fabs AS d FROM ia1)
 		SELECT iabs, d FROM fa1;
+
 	CREATE VIEW fqdelay (dts, msvdelay, msrdelay, mslatency) AS
 		SELECT ts - d, qdelay * 1000, (qdelay - vqnb) * 1000, owd * 1000
 		FROM p, o
 		ORDER BY ts;
+
 	CREATE VIEW fbandwidth (dts, load, rcapacity, vcapacity, pktsizebytes) AS
 		WITH
 		    prefiltered AS (
@@ -125,6 +130,12 @@ BEGIN
 		    (TRUNC(vbw) / 1000000)::NUMERIC(10,6) AS vcapacity,
 		    pktsizebytes
 		FROM filled, o ORDER BY ts;
+
+	CREATE OR REPLACE FUNCTION maptime(IN graphtime NUMERIC)
+	    RETURNS NUMERIC(20, 9) AS '
+		SELECT d + graphtime FROM o;
+	' LANGUAGE 'sql';
+
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -173,10 +184,5 @@ BEGIN
 	RETURN sid;
 END;
 $$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION maptime(IN graphtime NUMERIC)
-    RETURNS NUMERIC(20, 9) AS $$
-	SELECT d + graphtime FROM o;
-$$ LANGUAGE 'sql';
 
 COMMIT;
