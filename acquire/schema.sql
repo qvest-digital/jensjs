@@ -89,8 +89,13 @@ BEGIN
 		SELECT iabs, d FROM fa1;
 
 	CREATE VIEW fqdelay (dts, msvdelay, msrdelay, mslatency) AS
+		WITH
+		    prefiltered AS (
+			SELECT ts, qdelay, vqnb, owd FROM p
+			WHERE NOT p.isdrop
+		    )
 		SELECT ts - d, qdelay * 1000, (qdelay - vqnb) * 1000, owd * 1000
-		FROM p, o
+		FROM prefiltered, o
 		ORDER BY ts;
 
 	CREATE VIEW fbandwidth (dts, load, rcapacity, vcapacity, pktsizebytes) AS
