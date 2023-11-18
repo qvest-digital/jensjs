@@ -174,4 +174,9 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
+CREATE OR REPLACE FUNCTION maptime(IN graphtime NUMERIC)
+    RETURNS NUMERIC(20, 9) AS $$
+	SELECT d + graphtime FROM o;
+$$ LANGUAGE 'sql';
+
 COMMIT;
