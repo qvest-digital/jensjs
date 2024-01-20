@@ -1,4 +1,5 @@
 #!/bin/mksh
+# shellcheck shell=ksh
 
 set -e
 
