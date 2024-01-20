@@ -1,5 +1,7 @@
 {
+  "errors": [],
   "ignore": [
+    "adjoining-classes",
     "box-sizing",
     "fallback-colors",
     "ids",
@@ -7,6 +9,5 @@
     "overqualified-elements",
     "zero-units"
   ],
-  "warnings": [],
-  "errors": []
+  "warnings": []
 }
