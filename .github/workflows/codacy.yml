@@ -12,7 +12,7 @@
           "uses": "actions/checkout@v4.1.1"
         },
         {
-          "uses": "codacy/codacy-analysis-cli-action@v4.2.0",
+          "uses": "codacy/codacy-analysis-cli-action@v4.3.0",
           "with": {
             "format": "sarif",
             "gh-code-scanning-compat": true,
@@ -23,7 +23,7 @@
           }
         },
         {
-          "uses": "actions/upload-artifact@v3",
+          "uses": "actions/upload-artifact@v4.2.0",
           "with": {
             "name": "SARIF",
             "path": "results.sarif"
