@@ -9,19 +9,19 @@
       "runs-on": "ubuntu-latest",
       "steps": [
         {
-          "uses": "actions/checkout@v3.3.0"
+          "uses": "actions/checkout@v4.1.1"
         },
         {
-          "uses": "github/codeql-action/init@codeql-bundle-20230105",
+          "uses": "github/codeql-action/init@v2",
           "with": {
             "languages": "${{ matrix.language }}"
           }
         },
         {
-          "uses": "github/codeql-action/autobuild@codeql-bundle-20230105"
+          "uses": "github/codeql-action/autobuild@v2"
         },
         {
-          "uses": "github/codeql-action/analyze@codeql-bundle-20230105",
+          "uses": "github/codeql-action/analyze@v2",
           "with": {
             "category": "/language:${{matrix.language}}"
           }
