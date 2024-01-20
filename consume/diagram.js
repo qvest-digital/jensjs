@@ -181,6 +181,7 @@ usefulJS.deferDOM(function onDOMReady() {
 		"connectSeparatedPoints": true,
 		"legendFormatter": newFormatter,
 		"underlayCallback": function (ctx, area, dy) {
+			var i, point, cx, len, rate, w, e, x, y, yx;
 			var canvasx = function point2canvasx(point) {
 				return (area.w * point.x + area.x);
 			};
@@ -194,28 +195,28 @@ usefulJS.deferDOM(function onDOMReady() {
 			var pps = (canvasx(points[pl]) - canvasx(points[0])) /
 			    (points[pl].xval - points[0].xval);
 			pps = pps * 8 / 1000000;
-			for (var i = 0; i < pl; ++i) {
-				var point = points[i];
-				var cx = canvasx(point);
+			for (i = 0; i < pl; ++i) {
+				point = points[i];
+				cx = canvasx(point);
 				if (cx < 0)
 					continue;
-				var len = dy.getValue(point.idx, 4);
+				len = dy.getValue(point.idx, 4);
 				if (len === null)
 					continue;
-				var rate = dy.getValue(point.idx, 3);
-				var w = len * pps / rate;
+				rate = dy.getValue(point.idx, 3);
+				w = len * pps / rate;
 				if (w < 3)
 					return;
 				elts.push([cx, w]);
 			}
 			ctx.save();
-			var y;
-			var yx = [-1];
+			y;
+			yx = [-1];
 			pl = elts.length;
-			for (var i = 0; i < pl; ++i) {
-				var e = elts[i];
-				var x = e[0];
-				var w = e[1];
+			for (i = 0; i < pl; ++i) {
+				e = elts[i];
+				x = e[0];
+				w = e[1];
 				if (x < 0)
 					continue;
 				y = 0;
