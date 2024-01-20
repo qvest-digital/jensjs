@@ -23,6 +23,13 @@
           }
         },
         {
+          "uses": "actions/upload-artifact@v3",
+          "with": {
+            "name": "SARIF",
+            "path": "results.sarif"
+          }
+        },
+        {
           "run": "jq -c '.runs |= map(select(.tool.driver.name != \"Tsqllint (reported by Codacy)\"))' <results.sarif >editedresults.sarif"
         },
         {
