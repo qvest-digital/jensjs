@@ -210,7 +210,6 @@ usefulJS.deferDOM(function onDOMReady() {
 				elts.push([cx, w]);
 			}
 			ctx.save();
-			y;
 			yx = [-1];
 			pl = elts.length;
 			for (i = 0; i < pl; ++i) {
