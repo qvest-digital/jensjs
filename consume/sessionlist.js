@@ -24,6 +24,7 @@ usefulJS.deferDOM(function onDOMusable() {
 		elts[5] = usefulJS.xhtsafe(elts[1].value);
 		elts[1].value = elts[5];
 		elts[0].innerHTML = usefulJS.text2html(elts[5]);
+		// eslint-disable-next-line no-unused-vars
 		usefulJS.ezXHR(function postEvent(status, response, xhr) {
 			if (status === 204) {
 				elts[0].className = "";

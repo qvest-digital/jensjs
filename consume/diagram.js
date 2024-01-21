@@ -1,5 +1,7 @@
 // for graph.htm
 
+/* exported btnSess */
+
 var g = {};
 
 function btnSess() {
