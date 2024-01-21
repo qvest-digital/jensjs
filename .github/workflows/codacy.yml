@@ -23,6 +23,13 @@
           }
         },
         {
+          "uses": "actions/upload-artifact@v4.2.0",
+          "with": {
+            "name": "SARIF",
+            "path": "results.sarif"
+          }
+        },
+        {
           "run": "jq -c '.runs |= unique_by({tool, invocations, results})' <results.sarif >editedresults.sarif\nrm results.sarif\nmkdir results.sarif\njq -c '.runs |= .[0:15]' <editedresults.sarif >results.sarif/1.sarif\njq -c '.runs |= .[15:]' <editedresults.sarif >results.sarif/2.sarif\n"
         },
         {
