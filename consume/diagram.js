@@ -1,11 +1,16 @@
 // for graph.htm
 
 /* exported btnSess */
+/* exported ytoggle */
 
 var g = {};
 
 function btnSess() {
 	document.location.href = '/';
+}
+
+function ytoggle(graph, control) {
+	graph.setVisibility(control.value, control.checked);
 }
 
 g.nloading = 0;
@@ -15,8 +20,12 @@ g.loading = function loading(on) {
     };
 
 g.onHashChange = function onHashChange(newhash, ign) {
-	if (!ign)
-		g.reload();
+	if (ign)
+		return;
+	if (String(usefulJS.hashlib.get('id')) === g.id &&
+	    String(usefulJS.hashlib.get('ue')) === g.ue)
+		return;
+	g.reload();
     };
 
 g.reload = function reload() {
@@ -25,6 +34,13 @@ g.reload = function reload() {
 		alert("invalid ID: " + g.id);
 		return;
 	}
+	g.ue = String(usefulJS.hashlib.get('ue'));
+	if (!/^[0-7Y]$/.test(g.ue)) {
+		alert("invalid UE: " + g.ue);
+		return;
+	}
+	if (String(g.ueselect.value) !== g.ue)
+		g.ueselect.value = g.ue;
 	g.sessnum.innerHTML = g.id;
 	g.loading(true);
 	usefulJS.ezXHR(g.reload1, '/api/session?id=' + g.id);
@@ -49,8 +65,8 @@ g.reload1 = function reload1(status, response, xhr) {
 	    " • <b>comment:</b> " + (data.c == "" ? "<i>(none)</i>" :
 	    usefulJS.text2html(usefulJS.xhtsafe(data.c)));
 	g.loading(2); // number of AJAX requests we’ll start
-	usefulJS.ezXHR(g.reload_qdelay, '/api/session/qdelay?id=' + g.id);
-	usefulJS.ezXHR(g.reload_bw, '/api/session/bandwidth?id=' + g.id);
+	usefulJS.ezXHR(g.reload_qdelay, '/api/session/qdelay?id=' + g.id + '&ue=' + g.ue);
+	usefulJS.ezXHR(g.reload_bw, '/api/session/bandwidth?id=' + g.id + '&ue=' + g.ue);
 	g.loading(false); // for myself
     };
 
@@ -63,6 +79,8 @@ g.reload_qdelay = function reload_qdelay(status, response, xhr) {
 		return;
 	}
 	if (response === "") {
+		g.ndyelt.classList.remove("loaded-qdelay");
+		g.gLatency.updateOptions({"file": [[0,0,0,0],[1,1,1,1]]});
 		g.loading(false);
 		console.log("loading qdelay returned no data (yet)");
 		return;
@@ -82,6 +100,8 @@ g.reload_bw = function reload_bw(status, response, xhr) {
 		return;
 	}
 	if (response === "") {
+		g.ndyelt.classList.remove("loaded-bw");
+		g.gBW.updateOptions({"file": [[0,0,0,0,null],[1,1,1,1,null]]});
 		g.loading(false);
 		console.log("loading bw returned no data (yet)");
 		return;
@@ -98,6 +118,7 @@ usefulJS.deferDOM(function onDOMReady() {
 	g.loadingelt = document.getElementById('loadingelt');
 	g.sessnum = document.getElementById('sessnum');
 	g.sesprop = document.getElementById('sesprop');
+	g.ueselect = document.getElementById('uenum');
 	g.gLatency = new Dygraph(document.getElementById('divLatency'),
 	    /* initial dummy data */ [[0,0,0,0],[1,1,1,1]], {
 		"axes": {
@@ -242,5 +263,19 @@ usefulJS.deferDOM(function onDOMReady() {
 		"range": false
 	    });
 	usefulJS.hashlib(g.onHashChange);
+	var initUE = String(usefulJS.hashlib.get('ue'));
+	if (!/^[0-7Y]$/.test(initUE))
+		initUE = '0';
+	g.ueselect.value = initUE;
+	usefulJS.hashlib.set('ue', initUE);
+	g.ueselect.onchange = function onUESelect() {
+		var o = String(usefulJS.hashlib.get('ue'));
+		var n = String(g.ueselect.value);
+
+		if (n !== o) {
+			usefulJS.hashlib.set('ue', n);
+			g.reload();
+		}
+	    };
 	g.reload(); // initial load
     });

@@ -35,115 +35,115 @@ BEGIN
 	EXECUTE format('CREATE SCHEMA %I;', sid);
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
 
-	-- (ts, owd, qdelay, vqnb, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
-	CREATE TABLE p (
+	-- (vts, hts, flow, flags, kind, mark, ue, psize, uepkts, uebytes, iptos, vbw, rbw, vqdelay, rqdelay, owdelay)
+	CREATE TABLE r (
 		pk BIGSERIAL PRIMARY KEY,
-		len INTEGER NOT NULL,
-		ts NUMERIC(20, 9) NOT NULL,
-		owd NUMERIC(20, 9) NOT NULL,
-		qdelay NUMERIC(20, 9) NOT NULL,
-		vqnb NUMERIC(20, 9) NOT NULL,
-		ecnin VARCHAR(2) NOT NULL,
-		ecnout VARCHAR(2) NOT NULL,
-		bitfive BOOLEAN NOT NULL,
-		ismark BOOLEAN NOT NULL,
-		isdrop BOOLEAN NOT NULL,
+		vbw BIGINT NOT NULL,
+		rbw BIGINT NOT NULL,
+		psize INTEGER NOT NULL,
+		uepkts INTEGER NOT NULL,
+		uebytes INTEGER NOT NULL,
+		kind "char" NOT NULL,
+		mark BOOLEAN NOT NULL,
+		ue "char" NOT NULL,
+		-- really 8 hex nybbles but SQL meh ☹ so (normally)
+		-- CHAR(8) but that is slower in PostgreSQL actually
+		flags VARCHAR(8) NOT NULL,
+		iptos VARCHAR(2) NOT NULL,
+		vts NUMERIC(20, 9) NOT NULL,
+		hts NUMERIC(20, 9) NOT NULL,
+		vqdelay NUMERIC(20, 9) NOT NULL,
+		rqdelay NUMERIC(20, 9) NOT NULL,
+		owdelay NUMERIC(20, 9) NOT NULL,
 		flow TEXT NOT NULL
 	);
-	CREATE INDEX p_ts ON p (ts);
-
-	-- (ts, membytes, npkts, handover, vcap, tsofs, rcap)
-	CREATE TABLE q (
-		pk BIGSERIAL PRIMARY KEY,
-		membytes BIGINT NOT NULL,
-		vcap BIGINT NOT NULL,
-		rcap BIGINT NOT NULL,
-		npkts INTEGER NOT NULL,
-		handover BOOLEAN NOT NULL,
-		ts NUMERIC(20, 9) NOT NULL,
-		tsofs NUMERIC(20, 9) NOT NULL
-	);
-	CREATE INDEX q_ts ON q (ts);
+	CREATE INDEX r_vts ON r (vts);
+	CREATE INDEX r_kind_ue_vts ON r (kind, ue, vts);
 
 	CREATE VIEW o (ofs, d) AS
-		WITH
-		    p1 AS (
-			SELECT ts, NULL::NUMERIC(20,9) AS tsofs
-			FROM p ORDER BY pk LIMIT 1),
-		    q1 AS (
-			SELECT ts, tsofs FROM q ORDER BY pk LIMIT 1),
-		    pq1 AS (
-			SELECT * FROM p1
-			UNION ALL
-			SELECT * FROM q1
-			ORDER BY ts LIMIT 1),
-		    pq0 AS (
-			SELECT pq1.ts, q1.tsofs FROM pq1, q1),
-		    a1 AS (
-			SELECT ts, tsofs, ts + tsofs AS abs1 FROM pq0),
-		    ia1 AS (
-			SELECT ts, tsofs, abs1, TRUNC(abs1)::BIGINT AS iabs,
-			    abs1 - TRUNC(abs1) AS fabs FROM a1),
-		    fa1 AS (
-			SELECT ia1.*, ts - fabs AS d FROM ia1)
-		SELECT iabs, d FROM fa1;
+		SELECT TRUNC(hts)::BIGINT AS ofs, vts - (hts - TRUNC(hts)) AS d
+		FROM r ORDER BY pk LIMIT 1;
 
-	CREATE VIEW fqdelay (dts, msvdelay, msrdelay, mslatency) AS
+	CREATE OR REPLACE FUNCTION get_d()
+	    RETURNS NUMERIC(20, 9) AS $F$
+		-- SELECT d FROM o;
+		SELECT vts - (hts - TRUNC(hts)) FROM r ORDER BY pk LIMIT 1;
+	$F$ LANGUAGE SQL
+	    IMMUTABLE -- strictly not, but in practice
+	    PARALLEL SAFE;
+
+	CREATE OR REPLACE FUNCTION fqdelay(IN curue "char")
+	    RETURNS TABLE(
+		dts NUMERIC(20, 9),
+		msvqdelay NUMERIC(20, 6),
+		msrqdelay NUMERIC(20, 6),
+		msowdelay NUMERIC(20, 6)
+	    ) AS $F$
+		SELECT vts - get_d(),
+		    vqdelay * 1000, rqdelay * 1000, owdelay * 1000
+		FROM r
+		WHERE kind='1' AND ue=curue
+		ORDER BY vts;
+	$F$ LANGUAGE SQL
+	    STABLE
+	    PARALLEL SAFE
+	    ROWS 250000;
+
+	CREATE OR REPLACE FUNCTION fbandwidth(IN curue "char")
+	    RETURNS TABLE(
+		dts NUMERIC(20, 9),
+		load NUMERIC(10, 6),
+		rcapacity NUMERIC(10, 6),
+		vcapacity NUMERIC(10, 6),
+		pktsizebytes INTEGER
+	    ) AS $F$
 		WITH
 		    prefiltered AS (
-			SELECT ts, qdelay, vqnb, owd FROM p
-			WHERE NOT p.isdrop
-		    )
-		SELECT ts - d, qdelay * 1000, (qdelay - vqnb) * 1000, owd * 1000
-		FROM prefiltered, o
-		ORDER BY ts;
-
-	CREATE VIEW fbandwidth (dts, load, rcapacity, vcapacity, pktsizebytes) AS
-		WITH
-		    prefiltered AS (
-			SELECT ts, len FROM p
-			WHERE NOT p.isdrop
+			SELECT vts, psize, vbw, rbw FROM r
+			WHERE kind='1' AND ue=curue
+			ORDER BY vts
 		    ),
 		    calculated AS (
-			SELECT ts, len AS pktsizebytes, vcap, rcap,
-			    -- https://dba.stackexchange.com/a/105828/65843
-			    count(vcap) OVER wts AS ct,
+			SELECT vts, psize, vbw::NUMERIC, rbw::NUMERIC,
 			    -- https://stackoverflow.com/a/77051480/2171120
 			    CASE WHEN (COUNT(*) OVER wtim) > 20
-			    THEN 8 * (sum(len) OVER wnum) / NULLIF(ts - min(ts) OVER wnum, 0)
-			    ELSE 8 * (sum(len) OVER wtim) / NULLIF(ts - min(ts) OVER wtim, 0)
+			    THEN 8 * (sum(psize) OVER wnum) / NULLIF(vts - min(vts) OVER wnum, 0)
+			    ELSE 8 * (sum(psize) OVER wtim) / NULLIF(vts - min(vts) OVER wtim, 0)
 			    END AS bps
-			FROM prefiltered FULL OUTER JOIN q USING (ts)
+			           -- NUMERIC so the TRUNC below does not cast it to double
+			FROM prefiltered
 			WINDOW
-			    wnum AS (ORDER BY ts
+			    wnum AS (ORDER BY vts
 				ROWS BETWEEN 20 PRECEDING AND CURRENT ROW
 				EXCLUDE CURRENT ROW),
-			    wtim AS (ORDER BY ts
+			    wtim AS (ORDER BY vts
 				RANGE BETWEEN 0.1 PRECEDING AND CURRENT ROW
 				EXCLUDE CURRENT ROW),
-			    wts AS (ORDER BY ts)
-		    ),
-		    filled AS (
-			SELECT ts, pktsizebytes, bps,
-			    min(vcap) OVER (PARTITION BY ct) AS vbw,
-			    min(rcap) OVER (PARTITION BY ct) AS rbw
-			FROM calculated
+			    wts AS (ORDER BY vts)
+			ORDER BY vts
 		    )
-		SELECT ts - d AS dts,
+		SELECT vts - get_d() AS dts,
 		    (TRUNC(bps) / 1000000)::NUMERIC(10,6) AS load,
 		    (TRUNC(rbw) / 1000000)::NUMERIC(10,6) AS rcapacity,
 		    (TRUNC(vbw) / 1000000)::NUMERIC(10,6) AS vcapacity,
-		    pktsizebytes
-		FROM filled, o ORDER BY ts;
+		    psize AS pktsizebytes
+		FROM calculated ORDER BY vts;
+	$F$ LANGUAGE SQL
+	    STABLE
+	    PARALLEL SAFE
+	    ROWS 250000;
 
 	CREATE OR REPLACE FUNCTION maptime(IN graphtime NUMERIC)
-	    RETURNS NUMERIC(20, 9) AS '
-		SELECT d + graphtime FROM o;
-	' LANGUAGE 'sql';
+	    RETURNS NUMERIC(20, 9) AS $F$
+		SELECT get_d() + graphtime;
+	$F$ LANGUAGE SQL
+	    STABLE
+	    RETURNS NULL ON NULL INPUT
+	    PARALLEL SAFE;
 
 	RETURN sid;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION use_session(IN sid TEXT)
     RETURNS TEXT AS $$
@@ -155,7 +155,7 @@ BEGIN
 	EXECUTE format('SET search_path TO %I, jensjs, public;', sid);
 	RETURN sid;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION use_session(IN num INTEGER)
     RETURNS sessions AS $$
@@ -175,7 +175,7 @@ BEGIN
 	END;
 	RETURN sessions FROM sessions WHERE pk=num;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION drop_session(IN num INTEGER)
     RETURNS TEXT AS $$
@@ -188,6 +188,6 @@ BEGIN
 	DELETE FROM jensjs.sessions WHERE pk=num;
 	RETURN sid;
 END;
-$$ LANGUAGE 'plpgsql';
+$$ LANGUAGE plpgsql;
 
 COMMIT;

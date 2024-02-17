@@ -17,6 +17,7 @@ import urllib.parse
 
 import psycopg2.extensions
 import psycopg2.pool
+import psycopg2.sql
 
 psycopg2.extensions.register_adapter(bytes, psycopg2.extensions.QuotedString)
 
@@ -40,7 +41,10 @@ _JJS_path_registry = {"GET": {}, "POST": {}}
 class JJSRequestHandler(http.server.SimpleHTTPRequestHandler):
     def send_response_only(self, code, message=None):
         super().send_response_only(code, message)
-        self.send_header('Cache-Control', 'no-cache')
+        # cf. https://stackoverflow.com/a/2068407/2171120
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
 
     def do_GET(self):
         u = urllib.parse.urlparse(self.path)
@@ -98,6 +102,27 @@ def qs_int(rh, qs, key):
         ekey = urllib.parse.quote(key, errors='backslashreplace')
         rh.send_error(422, 'missing or malformed int(%s) parameter' % ekey)
         return None
+
+def qs_str(rh, qs, key):
+    try:
+        v = qs[key]
+        if isinstance(v, str):
+            return v
+        raise ValueError()
+    except (KeyError, ValueError):
+        ekey = urllib.parse.quote(key, errors='backslashreplace')
+        rh.send_error(422, 'missing or malformed str(%s) parameter' % ekey)
+        return None
+
+def qs_ue(rh, qs, key='ue'):
+    ue = qs_str(rh, qs, key)
+    if ue is None:
+        return
+    if ue not in ('0', '1', '2', '3', '4', '5', '6', '7', 'Y'):
+        ekey = urllib.parse.quote(key, errors='backslashreplace')
+        rh.send_error(422, 'invalid UE(%s) parameter' % ekey)
+        return None
+    return ue
 
 @Path("/api/test")
 def API_Test(rh, u, qs):
@@ -169,6 +194,8 @@ def API_Session_enter(csr, session_id):
 def API_Session_qdelay(rh, u, qs):
     session_id = qs_int(rh, qs, 'id')
     if session_id is None: return  # pylint: disable=multiple-statements
+    ue = qs_ue(rh, qs)
+    if ue is None: return  # pylint: disable=multiple-statements
     #inited = False
     with JJSDB() as csr:
         if API_Session_enter(csr, session_id):
@@ -177,14 +204,17 @@ def API_Session_qdelay(rh, u, qs):
         rh.send_response(200)
         rh.send_header("Content-Type", "text/plain")
         rh.end_headers()
-        csr.copy_expert("""COPY (
-            SELECT * FROM fqdelay
-          ) TO STDOUT WITH (DELIMITER ',')""", rh.wfile)
+        q = psycopg2.sql.SQL("SELECT * FROM fqdelay({})")
+        q = q.format(psycopg2.sql.Literal(ue))
+        q = psycopg2.sql.SQL("COPY ({}) TO STDOUT WITH (DELIMITER ',', NULL 'null')").format(q)
+        csr.copy_expert(q, rh.wfile)
 
 @Path("/api/session/bandwidth")
 def API_Session_bandwidth(rh, u, qs):
     session_id = qs_int(rh, qs, 'id')
     if session_id is None: return  # pylint: disable=multiple-statements
+    ue = qs_ue(rh, qs)
+    if ue is None: return  # pylint: disable=multiple-statements
     with JJSDB() as csr:
         if API_Session_enter(csr, session_id):
             rh.send_error(404, 'session not found')
@@ -192,9 +222,10 @@ def API_Session_bandwidth(rh, u, qs):
         rh.send_response(200)
         rh.send_header("Content-Type", "text/plain")
         rh.end_headers()
-        csr.copy_expert("""COPY (
-            SELECT * FROM fbandwidth
-          ) TO STDOUT WITH (DELIMITER ',', NULL 'null')""", rh.wfile)
+        q = psycopg2.sql.SQL("SELECT * FROM fbandwidth({})")
+        q = q.format(psycopg2.sql.Literal(ue))
+        q = psycopg2.sql.SQL("COPY ({}) TO STDOUT WITH (DELIMITER ',', NULL 'null')").format(q)
+        csr.copy_expert(q, rh.wfile)
 
 # …
 

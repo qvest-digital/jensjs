@@ -4,64 +4,36 @@ use warnings;
 use DBI;
 use DBD::Pg;
 
-my $dbhp = DBI->connect("dbi:Pg:", '', '',
-    {AutoCommit => 1, RaiseError => 1});
-my $dbhq = DBI->connect("dbi:Pg:", '', '',
+my $dbh = DBI->connect("dbi:Pg:", '', '',
     {AutoCommit => 1, RaiseError => 1});
 
 my $sessname = shift;
-my $sid = $dbhp->selectall_arrayref('SELECT jensjs.new_session($1)',
+my $sid = $dbh->selectall_arrayref('SELECT jensjs.new_session($1)',
     {}, $sessname)->[0]->[0];
-$dbhq->do('SELECT jensjs.use_session($1)', undef, $sid);
 
-my $np;
-my $nq;
-my $ni = 0;
+my $n;
 
-sub pbeg {
-	$dbhp->do(q{COPY p
-		(ts, owd, qdelay, vqnb, ecnin, ecnout, bitfive, ismark, isdrop, flow, len)
+sub bbeg {
+	$dbh->do(q{COPY r
+		(vts, hts, flow, flags, kind, mark, ue, psize, uepkts, uebytes, iptos, vbw, rbw, vqdelay, rqdelay, owdelay)
 		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
 	});
-	$np = 127;
+	$n = 0;
 }
-&pbeg;
-
-sub qbeg {
-	$dbhq->do(q{COPY q
-		(ts, membytes, npkts, handover, vcap, tsofs, rcap)
-		FROM STDIN WITH (FORMAT csv, DELIMITER E'\t')
-	});
-	$nq = 127;
-}
-&qbeg;
+&bbeg;
+$n = 127;
 
 while (<STDIN>) {
-	if (/^\"p\"\t/) {
-		s///;
-		$dbhp->pg_putcopydata($_);
-		if (++$np >= 128) {
-			$dbhp->pg_putcopyend();
-			&pbeg;
-		}
-	} elsif (/^\"q\"\t/) {
-		s///;
-		$dbhq->pg_putcopydata($_);
-		if (++$nq >= 128) {
-			$dbhq->pg_putcopyend();
-			&qbeg;
-		}
-	} else {
-		print STDERR "W: acquire: first ignored line: $_" if $ni == 0;
-		++$ni;
+	$dbh->pg_putcopydata($_);
+	if (++$n >= 128) {
+		$dbh->pg_putcopyend();
+		&bbeg;
 	}
 }
 
-$dbhp->pg_putcopyend() if $np > 0;
-$dbhq->pg_putcopyend() if $nq > 0;
-print STDERR "I: acquire: terminating, $ni lines ignored\n";
-$dbhp->disconnect or warn $dbhp->errstr;;
-$dbhq->disconnect or warn $dbhq->errstr;;
+$dbh->pg_putcopyend() if $n > 0;
+print STDERR "I: acquire: terminating\n";
+$dbh->disconnect or warn $dbh->errstr;;
 
 if ((shift || '') eq '-k') {
 	print STDERR "N: acquire: waiting for termination request...\n";

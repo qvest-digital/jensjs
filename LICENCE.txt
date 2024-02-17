@@ -1,4 +1,5 @@
 Copyright © 2022, 2023 mirabilos <t.glaser@tarent.de>
+Copyright © 2024 mirabilos <t.glaser@qvest-digital.com>
 Licensor: Deutsche Telekom LLCTO
 
 This work, with the exception of external libraries (Dygraphs,

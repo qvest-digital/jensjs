@@ -23,12 +23,41 @@
    <button type="button" onclick="btnSess();">change</button>
    <button type="button" onclick="g.reload();" title="force reload">🔄</button>
   </div>
+  <div class="boxl nowrap">
+   <b>UE #</b><select id="uenum">
+    <option>0</option>
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+    <option>4</option>
+    <option>5</option>
+    <option>6</option>
+    <option>7</option>
+    <option>Y</option>
+   </select>
+  </div>
   <div class="boxr nowrap">
    <b>SmoothingWindow</b> tbd
   </div>
  </div>
  <div class="boxfw yresizable"><div id="divLatency" class="dybox"></div></div>
+ <div><b>Display:</b>
+  <input type="checkbox" id="cbvq" value="0" onclick="ytoggle(g.gLatency, this);" checked="checked" />
+  <label for="cbvq"> vqdelay</label>
+  <input type="checkbox" id="cbrq" value="1" onclick="ytoggle(g.gLatency, this);" checked="checked" />
+  <label for="cbrq"> rqdelay</label>
+  <input type="checkbox" id="cbow" value="2" onclick="ytoggle(g.gLatency, this);" checked="checked" />
+  <label for="cbow"> OWD</label>
+ </div>
  <div class="boxfw yresizable"><div id="divBandwidth" class="dybox"></div></div>
+ <div><b>Display:</b>
+  <input type="checkbox" id="cbld" value="0" onclick="ytoggle(g.gBW, this);" checked="checked" />
+  <label for="cbld"> load</label>
+  <input type="checkbox" id="cbrc" value="1" onclick="ytoggle(g.gBW, this);" checked="checked" />
+  <label for="cbrc"> rcapacity</label>
+  <input type="checkbox" id="cbvc" value="2" onclick="ytoggle(g.gBW, this);" checked="checked" />
+  <label for="cbvc"> vcapacity</label>
+ </div>
  <div class="boxfw" id="sesprop">session properties</div>
  <div class="boxfw"><address>jensjs by Deutsche Telekom LLCTO</address></div>
  <span id="ndyelt">no data yet</span>
